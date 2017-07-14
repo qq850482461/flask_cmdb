@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <meta name="lzh" content="测试模版是否会写入这一段代码">
+{% endblock %}
+
+{% block title %}测试首页{% endblock title %}
+{% block content %}
+    <section class="content-header">
+        <h1>
+            首页
+            <small>介绍</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="#"><i class="fa fa-dashboard"></i>主页</a></li>
+            <li class="active">主页</li>
+        </ol>
+    </section>
+
+    <section class="content container-fluid">
+        <h1>{{ name }}</h1>
+    </section>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <!--我就是测试一下能不重写父模块-->
+{% endblock %}
