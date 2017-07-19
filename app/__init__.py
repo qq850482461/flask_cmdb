@@ -5,8 +5,9 @@ from flask_login import LoginManager
 #初始化对象
 db = SQLAlchemy()
 login_manager = LoginManager()
-login_manager.session_protection = 'strong'
+login_manager.session_protection = 'strong'#让session功能更加强壮
 login_manager.login_view = 'auth.login'#制定系统默认的登录页面
+login_manager.login_message = "请登录后再进行访问该页面！"
 
 #工厂化
 def create_app():
