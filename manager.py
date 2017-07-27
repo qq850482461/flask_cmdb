@@ -7,10 +7,8 @@ from flask_migrate import Migrate,MigrateCommand #flask 迁移数据
 app = create_app()
 migrate = Migrate(app,db)
 manager = Manager(app)
-
 # Migration commands
 manager.add_command('db', MigrateCommand)
-
 # # Add interactive project shell
 # def make_shell_context():
 #     return dict(app=create_app, db=db)

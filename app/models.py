@@ -1,7 +1,9 @@
 from . import db,login_manager
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash,check_password_hash#转换密码用到的库
-from flask_security import RoleMixin,UserMixin#登录和角色需要继承的对象
+from flask_login import UserMixin
+
+# from flask_security import RoleMixin,UserMixin#登录和角色需要继承的对象
 
 #角色<-->用户，关联表
 roles_users = db.Table(
@@ -12,7 +14,7 @@ roles_users = db.Table(
 
 
 #角色表
-class Role(db.Model,RoleMixin):
+class Role(db.Model):
     __tablename__ = 'role'
     id = db.Column(db.Integer(),primary_key=True)
     name = db.Column(db.String(80),unique=True)
@@ -40,10 +42,6 @@ class User(db.Model,UserMixin):
     def load_user(id):
         return User.query.get(int(id))
 
-    #重写is_active模块因为表单没有这个字段所以重新返回T
-    @property
-    def is_active(self):
-        return True
 
     @property
     def password(self):

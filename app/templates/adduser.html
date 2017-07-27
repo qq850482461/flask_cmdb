@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+    {{ super() }}
+    <!-- 选择器JS -->
+    <link rel="stylesheet" href="{{url_for('static',filename='bower_components/select2/dist/css/select2.min.css')}}">
+{% endblock styles %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                个人中心
+                <small>增加用户</small>
+            </h1>
+        </section>
+        <section class="content">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">用户列表</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#adduser">
+                            <i class="fa fa-plus"></i><span>增加用户</span>
+                        </button>
+                    </div>
+                </div>
+                <table class="table table-bordered table-hover text-center">
+                    <th width="25%">ID</th>
+                    <th width="25%">用户名</th>
+                    <th width="25%">角色</th>
+                    <th width="25%">窒息的操作</th>
+                    <tr>
+                        <td>1</td>
+                        <td>admin</td>
+                        <td>admin</td>
+                        <td>
+                            <button type="button" class="fa fa-cog"></button>
+                            &nbsp;
+                            <button type="button" class="fa fa-trash-o"></button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal fade" id="adduser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <span>用户信息</span>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action="url_for('auth.adduser')" class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span class=" font-bold text-danger ">*</span>
+                                        <span>用户名</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="user">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span class=" font-bold text-danger ">*</span>
+                                        <span>角色</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <select class="form-control select2" multiple="multiple"
+                                                data-placeholder="Select a State"
+                                                style="width: 100%;">
+                                            <option>选项1</option>
+                                            <option>选项2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span class=" font-bold text-danger ">*</span>
+                                        <span>密码</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="pw">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="add">
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock content %}
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static',filename='bower_components/select2/dist/js/select2.full.min.js') }}"></script>
+
+    <script>
+        //模态框居中
+        $("[data-toggle='modal']").click(function () {
+            var _target = $(this).attr('data-target')
+            t = setTimeout(function () {
+                var _modal = $(_target).find(".modal-dialog")
+                _modal.animate({'margin-top': parseInt(($(window).height() - _modal.height()) / 2)}, 300)
+            }, 200)
+        });
+
+        //模态框提交表单
+        $("#add").click(function () {
+            var user = $("input[name='user']").val();
+            var pw = $("input[name='pw']").val();
+            var select = $(".select2 option:selected").text();
+            $.ajax(
+
+            );
+            alert(user + "" + pw + "" + select)
+        });
+
+        $(function () {
+            //装载选项卡
+            $('.select2').select2()
+        })
+    </script>
+{% endblock scripts %}

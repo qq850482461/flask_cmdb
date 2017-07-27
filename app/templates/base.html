@@ -4,19 +4,21 @@
     {% block head %}
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>{% block title %}{% endblock %}</title>
+        <title>{% block title %}{{ title }}{% endblock %}</title>
         {% block styles %}
             <!-- 告诉浏览器能够响应屏幕宽度 -->
             <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-            <link rel="stylesheet" href="../static/bower_components/bootstrap/dist/css/bootstrap.min.css">
+            <link rel="stylesheet"
+                  href="{{ url_for('static',filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
             <!-- Font Awesome -->
-            <link rel="stylesheet" href="../static/bower_components/font-awesome/css/font-awesome.min.css">
+            <link rel="stylesheet"
+                  href="{{ url_for('static',filename='bower_components/font-awesome/css/font-awesome.min.css') }}">
             <!-- 图标 -->
-            <link rel="stylesheet" href="../static/bower_components/Ionicons/css/ionicons.min.css">
+            <link rel="stylesheet" href="{{url_for('static',filename='bower_components/Ionicons/css/ionicons.min.css')}}">
             <!-- 主题 style -->
-            <link rel="stylesheet" href="../static/dist/css/AdminLTE.min.css">
+            <link rel="stylesheet" href="{{url_for('static',filename='dist/css/AdminLTE.min.css')}}">
             <!--皮肤-->
-            <link rel="stylesheet" href="../static/dist/css/skins/skin-blue.min.css">
+            <link rel="stylesheet" href="{{url_for('static',filename='dist/css/skins/skin-blue.min.css')}}">
             <!-- Google Font -->
             <link rel="stylesheet"
                   href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -27,37 +29,38 @@
 <body class="hold-transition skin-blue sidebar-mini">
 {% block body %}
     <div class="wrapper">
-        <!-- Header头部包括navbar部分 -->
-       {% include 'includes/_navbar.html' %}
-        <!--左边的侧列 -->
-       {% include 'includes/_left_menu.html' %}
-
+        {% include 'includes/_navbar.html' %}
+        {% include 'includes/_left_menu.html' %}
         <!-- 内容包装器，包含页面内容 -->
-        <div class="content-wrapper">
-            {% block content %}
+        {% block content %}
 
-            {% endblock content %}
-        </div>
-        <!-- /.内容包装器，包含页面内容 -->
-
+        {% endblock content %}
         <!-- Footer -->
-        <footer class="main-footer">
-            {% block footer %}
+        {% block footer %}
+            <footer class="main-footer">
                 <strong>Copyright &copy; 2017 <a href="#">Company</a>.</strong>
-            {% endblock footer %}
-        </footer>
-
+            </footer>
+        {% endblock footer %}
         <div class="control-sidebar-bg"></div>
     </div>
 
     {% block scripts %}
-        <!-- js组件放这里 -->
         <!-- jQuery 3 -->
-        <script src="../static/bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="{{ url_for('static',filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
         <!-- Bootstrap 3.3.7 -->
-        <script src="../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="{{ url_for('static',filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
         <!-- AdminLTE App -->
-        <script src="../static/dist/js/adminlte.min.js"></script>
+        <script src="{{ url_for('static',filename='dist/js/adminlte.min.js') }}"></script>
+        <script>
+            var url = window.location;
+            // 当前页面添加active
+            $('ul.sidebar-menu a').filter(function () {
+                return this.href == url;
+            }).parent().addClass('active');
+            $('ul.treeview-menu a').filter(function () {
+                return this.href == url;
+            }).parentsUntil(".sidebar-menu > .treeview-menu").addClass('active');
+        </script>
     {% endblock scripts %}
 {% endblock body %}
 </body>

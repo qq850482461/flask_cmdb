@@ -6,20 +6,22 @@
 
 {% block title %}测试首页{% endblock title %}
 {% block content %}
-    <section class="content-header">
-        <h1>
-            首页
-            <small>介绍</small>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i>主页</a></li>
-            <li class="active">主页</li>
-        </ol>
-    </section>
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                首页
+                <small>介绍</small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="#"><i class="fa fa-dashboard"></i>主页</a></li>
+                <li class="active">主页</li>
+            </ol>
+        </section>
 
-    <section class="content container-fluid">
-        <h1>{{ name }}</h1>
-    </section>
+        <section class="content container-fluid">
+            <h1>{{ name }}</h1>
+        </section>
+    </div>
 {% endblock %}
 
 {% block scripts %}
