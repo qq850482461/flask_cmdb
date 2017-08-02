@@ -3,9 +3,23 @@
 {% block styles %}
     {{ super() }}
     <!-- 选择器JS -->
-    <link rel="stylesheet" href="{{url_for('static',filename='bower_components/select2/dist/css/select2.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='bower_components/select2/dist/css/select2.min.css') }}">
+    <!--动画-->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bower_components/style.css') }}">
+
 {% endblock styles %}
 {% block content %}
+    <ul id="spinners">
+        <li id="loadding">
+            <div id="preloader_1">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </li>
+    </ul>
     <div class="content-wrapper">
         <section class="content-header">
             <h1>
@@ -26,22 +40,34 @@
                     </div>
                 </div>
                 <table class="table table-bordered table-hover text-center">
+                    <thead>
                     <th width="25%">ID</th>
                     <th width="25%">用户名</th>
                     <th width="25%">角色</th>
                     <th width="25%">窒息的操作</th>
-                    <tr>
-                        <td>1</td>
-                        <td>admin</td>
-                        <td>admin</td>
-                        <td>
-                            <button type="button" class="fa fa-cog"></button>
-                            &nbsp;
-                            <button type="button" class="fa fa-trash-o"></button>
-                        </td>
-                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for i in test %}
+                        <tr>
+                            <td>{{ i.id }}</td>
+                            <td class="td-name">{{ i.username }}</td>
+                            <td>
+                                {% for role in i.roles %}
+                                    <span class="badge bg-light-blue">{{ role.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <button type="button" class="fa fa-cog" data-toggle="modal" data-target="#update"
+                                        onclick="return get_edit_info({{ i.id }})"></button>
+                                &nbsp;
+                                <button type="button" class="fa fa-trash-o" onclick="delect_info({{ i.id }})"></button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
                 </table>
             </div>
+            <!--提交模态框-->
             <div class="modal fade" id="adduser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
                  aria-hidden="true">
                 <div class="modal-dialog">
@@ -52,46 +78,100 @@
                             </div>
                         </div>
                         <div class="modal-body">
-                            <form method="post" action="url_for('auth.adduser')" class="form-horizontal">
-                                <div class="form-group">
+                            <form id="test" class="form-horizontal">
+                                <div class="form-group" id="user">
                                     <label class="col-sm-3 control-label">
-                                        <span class=" font-bold text-danger ">*</span>
                                         <span>用户名</span>
                                     </label>
                                     <div class="col-sm-8">
-                                        <input class=" form-control" name="user">
+                                        <input class="form-control" name="user">
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">
-                                        <span class=" font-bold text-danger ">*</span>
                                         <span>角色</span>
                                     </label>
                                     <div class="col-sm-8">
-                                        <select class="form-control select2" multiple="multiple"
-                                                data-placeholder="Select a State"
-                                                style="width: 100%;">
-                                            <option>选项1</option>
-                                            <option>选项2</option>
+                                        <select name="select" class="form-control select2" multiple="multiple"
+                                                data-placeholder="分配角色"
+                                                style="width: 100%; ">
+                                            {% for role in roles %}
+                                                <option>{{ role.name }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group" id="password">
                                     <label class="col-sm-3 control-label">
-                                        <span class=" font-bold text-danger ">*</span>
                                         <span>密码</span>
                                     </label>
                                     <div class="col-sm-8">
-                                        <input class=" form-control" name="pw">
+                                        <input class=" form-control" name="password">
                                     </div>
                                 </div>
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                关闭
                             </button>
                             <button type="submit" class="btn btn-primary" id="add">
                                 提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--更新模态框-->
+            <div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <span>更新用户信息</span>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal update">
+                                <div class="form-group" id="user">
+                                    <label class="col-sm-3 control-label">
+                                        <span>用户名</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" name="user" id="update_user">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>角色</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <select name="select" class="form-control select2" multiple="multiple"
+                                                data-placeholder="分配角色"
+                                                style="width: 100%; ">
+                                            {% for role in roles %}
+                                                <option>{{ role.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="password">
+                                    <label class="col-sm-3 control-label">
+                                        <span>密码</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="password">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                关闭
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                更新
                             </button>
                         </div>
                     </div>
@@ -105,6 +185,7 @@
     <script src="{{ url_for('static',filename='bower_components/select2/dist/js/select2.full.min.js') }}"></script>
 
     <script>
+
         //模态框居中
         $("[data-toggle='modal']").click(function () {
             var _target = $(this).attr('data-target')
@@ -114,19 +195,128 @@
             }, 200)
         });
 
-        //模态框提交表单
+        //模态框新增提交表单
         $("#add").click(function () {
             var user = $("input[name='user']").val();
-            var pw = $("input[name='pw']").val();
-            var select = $(".select2 option:selected").text();
-            $.ajax(
+            var password = $("input[name='password']").val();
+            //var select = $(".select2 option:selected").text();
 
-            );
-            alert(user + "" + pw + "" + select)
+            //判断user
+            if (user.length == 0) {
+                $("#user").addClass("has-error");
+                $(".col-sm-8:first").append('<span class="help-block">用户名不能为空</span> ');
+                return false;
+            }
+            else {
+                $("#user").removeClass("has-error");
+                $(".help-block:first").remove();
+            }
+
+            //判断password
+            if (password.length == 0) {
+                $("#password").addClass("has-error");
+                $(".col-sm-8:last").append('<span class="help-block">密码不能为空</span> ');
+                return false;
+            }
+            else {
+                $("#password").removeClass("has-error");
+                $(".help-block").remove();
+            }
+            //提交表单
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('auth.adduser') }}",
+                data: $('.form-horizontal').serialize(),
+                success: function (res) {
+                    if (res.message == "error") {
+                        $("#user").addClass("has-error");
+                        $(".col-sm-8:first").append('<span class="help-block">用户名重复</span> ');
+                        return false;
+                    }
+                    else {
+                        $('#adduser').modal('hide')
+                        $("#loadding").addClass("active")
+                        setTimeout("location.reload()", 1700)
+                    }
+                },
+                error: function () {
+                    alert("出错！无法提交到后台")
+                }
+            });
+        });
+        //编辑表单
+        function get_edit_info(id) {
+            if (!id) {
+                alert('不要修改ID，错误')
+                return false;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('auth.edit_user') }}",
+                data: {"id": id, "act": "query"},
+                success: function (data) {
+                    if (data) {
+                        //赋值
+                        $("#update_user").val(data.username);
+                        //$("#update_user").attr("disabled", "disabled");
+
+                    }
+                    else {
+                        alert("都没有回调函数。。。出错了")
+                    }
+                },
+            });
+
+        }
+        //删除
+        function delect_info(id) {
+            if (!id) {
+                alert('不要修改ID，错误')
+                return false;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('auth.edit_user') }}",
+                data: {"id": id, "act": "delect"},
+                success: function (data) {
+                    if (data.message == 200) {
+                        $("#loadding").addClass("active")
+                        setTimeout("location.reload()", 1700)
+                    }
+                    else {
+                        alert("都没有回调函数。。。出错了")
+                    }
+                },
+            });
+        }
+        //更新表单
+        $(".btn.btn-success").click(function () {
+            var user = $("#update_user").val();
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('auth.adduser') }}",
+                data: $('.form-horizontal.update').serialize(),
+                success: function (res) {
+                    if (res.message == "error") {
+                        $("#user").addClass("has-error");
+                        $(".col-sm-8:first").append('<span class="help-block">用户名重复</span> ');
+                        return false;
+                    }
+                    else {
+                        $('#update').modal('hide')
+                        $("#loadding").addClass("active")
+                        setTimeout("location.reload()", 1500)
+                    }
+                },
+                error: function () {
+                    alert("出错！无法提交到后台")
+                }
+            });
         });
 
+        //装载多选项卡
         $(function () {
-            //装载选项卡
             $('.select2').select2()
         })
     </script>

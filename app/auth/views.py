@@ -1,11 +1,10 @@
 from . import auth
 from .. import db,admin_permission
-from ..models import User
-from flask import redirect,render_template,request,url_for,flash
+from ..models import User,Role
+from flask import redirect,render_template,request,url_for,flash,jsonify
 from flask_login import login_user,logout_user,current_user,login_required
 # from flask_security import roles_required,current_user,logout_user,login_user,login_required
 from flask_principal import Identity, AnonymousIdentity, identity_changed, current_app,IdentityContext
-
 
 
 
@@ -74,17 +73,66 @@ def resetpw():
 @login_required
 @admin_permission.require(http_exception=403)
 def adduser():
+    all_users = User.query.order_by(User.id.desc())
+    all_roles = Role.query.all()
+
     if request.method == 'POST':
         username = request.form['user']
         password = request.form['password']
-        print(username)
-        # search = User.query.filter_by(username=username).first()
-        # if search is None:
-        #     user = User(username=username,password=password)
-        #     db.session.add(user)
-        #     db.session.commit()
-        #     flash('应该是提交成功了吧。')
-        # else:
-        #     flash('这个用户名应该是有人用了吧。。')
+        select = request.form.getlist('select')
+        roles = []
+        #转换成为Role对象的list
+        for i in select:
+            role = Role.query.filter_by(name=i).first()
+            roles.append(role)
 
-    return render_template('adduser.html')
+        user = User.query.filter_by(username=username).first()
+        res = {'status': 200, 'message': "succeed"}
+
+        #增加用户模块
+        if username and password is not None:
+            #判断是否存在该用户
+            if user is None:
+                user = User(username=username,password=password)
+                user.roles = roles
+                db.session.add(user)
+                db.session.commit()
+                #返回json到前端
+                return jsonify(res)
+            else:
+                print("更新操作执行")
+                user.username = username
+                user.password = password
+                user.roles = roles
+                db.session.add(user)
+                db.session.commit()
+                return jsonify(res)
+
+    return render_template('adduser.html',roles=all_roles,test=all_users)
+
+#查询api接口
+@auth.route('/api/edit_user',methods=['POST'])
+@login_required
+@admin_permission.require(http_exception=403)
+def edit_user():
+    if request.method == 'POST':
+        id = request.form['id']
+        act = request.form['act']
+
+        #查询
+        if act == "query":
+            user = User.query.get(id)
+            roles = []
+            if user is not None:
+                res = {"username":user.username,}
+                for i in user.roles:
+                    roles.append(i.name)
+                res["roles"] = roles
+            return jsonify(res)
+        #删除
+        if act == "delect":
+            user = User.query.get(id)
+            db.session.delete(user)
+            db.session.commit()
+            res = {"message":200}
+            return  jsonify(res)

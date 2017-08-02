@@ -46,6 +46,8 @@ class User(db.Model,UserMixin):
     @property
     def password(self):
         raise AttributeError("密码不允许读取,请使用check_password_hash()进行验证密码")
+        return
+
 
     #转换密码为hash存入数据库
     @password.setter
