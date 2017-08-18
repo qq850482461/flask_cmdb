@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <!-- 表格样式 -->
+    <link rel="stylesheet"
+          href="{{ url_for('static',filename='bower_components/datatables.net-bs/css/dataTables.bootstrap.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                邮箱管理
+                <small>邮箱管理</small>
+            </h1>
+        </section>
+        <section class="content">
+            <div class="box">
+                <div class="box-header">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <select id='select_email' class="select2" style="width: 100%;">
+                                <option disabled selected value></option>
+                                <option>选项1</option>
+                                <option>选项2</option>
+                            </select>
+                        </div>
+                        <div class="col-md-">
+                            <button id="add_email" class="btn btn-success">添加</button>
+                            <button id="edit_email" class="btn btn-success">修改</button>
+                            <button id="test2" class="btn btn-danger">删除</button>
+                            <button class="btn btn-info">配置预览</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-body">
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>邮箱</th>
+                            <th>密码</th>
+                            <th>备注</th>
+                            <th>POP(接收服务器)</th>
+                            <th>POP(Port)</th>
+                            <th>SMTP(发送服务器)</th>
+                            <th>SMTP(Port)</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <!--弹出模态框-->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <span id="modal-title">添加邮箱</span>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <form id="test" class="form-horizontal">
+                                <div class="form-group" id="email">
+                                    <label class="col-sm-3 control-label">
+                                        <span>邮箱</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" name="email">
+                                    </div>
+                                </div>
+                                <div class="form-group" id="password">
+                                    <label class="col-sm-3 control-label">
+                                        <span>密码</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="password">
+                                    </div>
+                                </div>
+                                <div class="form-group" id="description">
+                                    <label class="col-sm-3 control-label">
+                                        <span>备注</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="description">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>邮箱服务器</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <select name="select_email" id='select_email' class="select2"
+                                                style="width: 100%;">
+                                            <option disabled selected value></option>
+                                            <option>选项1</option>
+                                            <option>选项2</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                关闭
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="save">
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+{% endblock content %}
+{% block scripts %}
+    {{ super() }}
+    <!-- DataTables -->
+    <script type="application/javascript"
+            src="{{ url_for('static',filename='bower_components/datatables.net/js/jquery.dataTables.min.js') }}"
+    ></script>
+    <script type="application/javascript"
+            src="{{ url_for('static',filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"
+    ></script>
+    <script type="application/javascript"
+            src="{{ url_for('static',filename='bower_components/select2/dist/js/select2.full.min.js') }}"
+    ></script>
+    <script type="application/javascript" src="{{ url_for('static',filename="layer/layer.js") }}"></script>
+    <script>
+        //初始化select2选项卡
+        var select2 = $('.select2').select2({
+            placeholder: '请选择邮箱类型',
+            allowClear: true
+        })
+
+        //初始化DataTable
+        var table = $('#example1').DataTable({
+            //延迟渲染
+            "deferRender": true,
+            //判断是否为SSL端口
+            "createdRow": function (row, data, index) {
+                var pop = data.pop_port
+                var smtp = data.smtp_port
+                if (pop == "995") {
+                    $('td', row).eq(5).prepend('<span class="badge bg-green">SSL</span>&nbsp;');
+                }
+                else {
+                    $('td', row).eq(5).prepend('<span class="badge bg-light-blue">TLS</span>&nbsp;');
+                }
+                if (smtp == "465") {
+                    $('td', row).eq(7).prepend('<span class="badge bg-green">SSL</span>&nbsp;');
+                }
+                else {
+                    $('td', row).eq(7).prepend('<span class="badge bg-light-blue">TLS</span>&nbsp;');
+                }
+            },
+            "ajax": {
+                type: 'Post',
+                data: {"type": "默认传递"},
+                url: "{{ url_for('main.queryemail') }}"
+            },
+            "columns": [
+                {"data": "id", "orderable": false, "searchable": false},
+                {"data": "email"},
+                {"data": "password", "orderable": false, "searchable": false},
+                {"data": "description", "orderable": false, "searchable": false},
+                {"data": "pop", "orderable": false, "searchable": false},
+                {"data": "pop_port", "orderable": false, "searchable": false},
+                {"data": "smtp", "orderable": false, "searchable": false},
+                {"data": "smtp_port", "orderable": false, "searchable": false}
+            ],
+            //国际化
+            "language": {
+                "sProcessing": "处理中...",
+                "sLengthMenu": "显示 _MENU_ 项结果",
+                "sZeroRecords": "没有匹配结果",
+                "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                "sInfoPostFix": "",
+                "sSearch": "搜索:",
+                "sUrl": "",
+                "sEmptyTable": "表中数据为空",
+                "sLoadingRecords": "载入中...",
+                "sInfoThousands": ",",
+                "oPaginate": {
+                    "sFirst": "首页",
+                    "sPrevious": "上页",
+                    "sNext": "下页",
+                    "sLast": "末页"
+                },
+                "oAria": {
+                    "sSortAscending": ": 以升序排列此列",
+                    "sSortDescending": ": 以降序排列此列"
+                }
+            }
+        });
+        //邮箱选择器
+        $('#select_email').change(function () {
+            var checkValue = $("#select_email").val();
+            console.log(checkValue)
+            var data = {'type': checkValue}
+            //动态修改参数传给服务器
+            table.settings()[0].ajax.data = data
+            table.ajax.reload();
+        });
+        //选中行
+        $('#example1 tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+
+        //清空模态框
+        function clear() {
+            $("input[name='email']").val("");
+            $("input[name='password']").val("");
+            $("input[name='description']").val("");
+            //清空select2
+            select2.val(null).trigger("change");
+        }
+
+        //添加按钮
+        $('#add_email').on('click', function () {
+            $("#modal-title").text("新增邮箱");
+            clear()
+            $("#myModal").modal("show");
+        });
+        //提交按钮
+        $('#save').on('click', function () {
+            layer.msg("doSomething");
+        });
+        //修改按钮
+        $('#edit_email').on('click', function () {
+            var selected = table.row('.selected').data()
+            if (typeof(selected) == 'undefined') {
+                layer.msg("请先选择一行");
+            }
+            else {
+                clear()
+                //进行edit更新赋值
+                $("#modal-title").text("修改" + selected.email);
+                $("input[name='email']").val(selected.email);
+                $("input[name='password']").val(selected.password);
+                $("input[name='description']").val(selected.description);
+                $("#myModal").modal("show");
+            }
+        });
+
+        //删除按钮
+        $('#test2').on('click', function () {
+            var selected = table.row('.selected').data()
+            if (typeof(selected) == 'undefined') {
+                layer.msg("没有选中任何对象");
+            }
+            else {
+
+            }
+        });
+    </script>
+{% endblock %}

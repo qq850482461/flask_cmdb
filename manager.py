@@ -9,10 +9,8 @@ migrate = Migrate(app,db)
 manager = Manager(app)
 # Migration commands
 manager.add_command('db', MigrateCommand)
-# # Add interactive project shell
-# def make_shell_context():
-#     return dict(app=create_app, db=db)
-# manager.add_command("shell", Shell(make_context=make_shell_context))
+
+
 
 #创建数据库
 @manager.command

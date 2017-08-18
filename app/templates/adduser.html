@@ -4,7 +4,7 @@
     {{ super() }}
     <!-- 选择器JS -->
     <link rel="stylesheet" href="{{ url_for('static',filename='bower_components/select2/dist/css/select2.min.css') }}">
-    <!--动画-->
+    <!--加载动画-->
     <link rel="stylesheet" href="{{ url_for('static',filename='bower_components/style.css') }}">
 
 {% endblock styles %}
@@ -185,7 +185,6 @@
     <script src="{{ url_for('static',filename='bower_components/select2/dist/js/select2.full.min.js') }}"></script>
 
     <script>
-
         //模态框居中
         $("[data-toggle='modal']").click(function () {
             var _target = $(this).attr('data-target')

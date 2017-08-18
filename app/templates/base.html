@@ -14,11 +14,15 @@
             <link rel="stylesheet"
                   href="{{ url_for('static',filename='bower_components/font-awesome/css/font-awesome.min.css') }}">
             <!-- 图标 -->
-            <link rel="stylesheet" href="{{url_for('static',filename='bower_components/Ionicons/css/ionicons.min.css')}}">
+            <link rel="stylesheet"
+                  href="{{ url_for('static',filename='bower_components/Ionicons/css/ionicons.min.css') }}">
+            <!-- select2 -->
+            <link rel="stylesheet"
+                  href="{{ url_for('static',filename='bower_components/select2/dist/css/select2.min.css') }}">
             <!-- 主题 style -->
-            <link rel="stylesheet" href="{{url_for('static',filename='dist/css/AdminLTE.min.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='dist/css/AdminLTE.min.css') }}">
             <!--皮肤-->
-            <link rel="stylesheet" href="{{url_for('static',filename='dist/css/skins/skin-blue.min.css')}}">
+            <link rel="stylesheet" href="{{ url_for('static',filename='dist/css/skins/skin-blue.min.css') }}">
             <!-- Google Font -->
             <link rel="stylesheet"
                   href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
@@ -38,7 +42,7 @@
         <!-- Footer -->
         {% block footer %}
             <footer class="main-footer">
-                <strong>Copyright &copy; 2017 <a href="#">Company</a>.</strong>
+                <strong>Copyright &copy; 2017 <a href="#">佚名</a>.</strong>
             </footer>
         {% endblock footer %}
         <div class="control-sidebar-bg"></div>
