@@ -185,7 +185,7 @@ div.table-responsive > div.dataTables_wrapper > div.row > div[class^="col-"]:las
 
 /*selected*/
 table.dataTable tbody tr.selected {
-  background-color: #2c74ce;
+  background-color: #7a87c3;
   color:white;
 }
 table.dataTable.stripe tbody tr.odd.selected, table.dataTable.display tbody tr.odd.selected {
