@@ -13,8 +13,11 @@
             </span>
                 </a>
                 <ul class="treeview-menu">
+                    <li><a href="{{ url_for('main.email') }}"><i class="fa fa-laptop"></i> <span>查询邮箱</span></a>
+                    </li>
                     {% if admin.can() %}
-                        <li><a href="{{ url_for('main.email') }}"><i class="fa fa-laptop"></i> <span>查询邮箱</span></a>
+                        <li><a href="{{ url_for('main.email_edit') }}"><i class="fa fa-laptop"></i>
+                            <span>邮箱管理</span></a>
                         </li>
                     {% endif %}
                 </ul>

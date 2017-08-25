@@ -63,7 +63,9 @@ class Emailserver(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     name = db.Column(db.String(80))
     pop = db.Column(db.String(80))
+    pop_port = db.Column(db.Integer())
     smtp = db.Column(db.String(80))
+    smtp_port = db.Column(db.Integer())
     email = db.relationship('Email', backref='email_server', lazy='dynamic')
 
     def __repr__(self):

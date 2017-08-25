@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <!-- 表格样式 -->
+    <link rel="stylesheet"
+          href="{{ url_for('static',filename='bower_components/datatables.net-bs/css/dataTables.bootstrap.css') }}">
+    <!-- 验证样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
+{% endblock %}
+{% block title %}邮箱服务器管理{% endblock title %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                邮箱服务器管理
+                <small>邮箱服务器管理</small>
+            </h1>
+
+        </section>
+        <section class="content">
+            <div class="box">
+                <div class="box-header">
+                    <button class="btn btn-success" data-toggle="modal" data-target="#myModal">添加</button>
+                    <button id="edit_email" class="btn btn-success">修改</button>
+                    <button id="delete_email" class="btn btn-danger">删除</button>
+                </div>
+                <div class="box-body">
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>邮箱服务器</th>
+                            <th>POP(接收服务器)</th>
+                            <th>POP(Port)</th>
+                            <th>SMTP(发送服务器)</th>
+                            <th>SMTP(Port)</th>
+                        </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <!--弹出模态框-->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <span id="modal-title">添加服务器</span>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <form id="test2" class="form-horizontal">
+                                <div class="form-group" id="email">
+                                    <label class="col-sm-3 control-label">
+                                        <span>邮箱服务器</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" name="email">
+                                    </div>
+                                </div>
+                                <div class="form-group" id="pop_server">
+                                    <label class="col-sm-3 control-label">
+                                        <span>POP服务器</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="pop_server">
+                                    </div>
+                                </div>
+                                <div class="form-group" id="pop_port">
+                                    <label class="col-sm-3 control-label">
+                                        <span>POP端口</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="number" class=" form-control" name="pop_port">
+                                    </div>
+                                </div>
+                                <div class="form-group" id="smtp_server">
+                                    <label class="col-sm-3 control-label">
+                                        <span>SMTP服务器</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="smtp_server">
+                                    </div>
+                                </div>
+                                <div class="form-group" id="smtp_port">
+                                    <label class="col-sm-3 control-label">
+                                        <span>SMTP端口</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input type="number" class=" form-control" name="smtp_port">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                关闭
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="save">
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <!-- DataTables -->
+    <script type="application/javascript"
+            src="{{ url_for('static',filename='bower_components/datatables.net/js/jquery.dataTables.min.js') }}"
+    ></script>
+    <script type="application/javascript"
+            src="{{ url_for('static',filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"
+    ></script>
+    <script type="application/javascript" src="{{ url_for('static',filename="layer/layer.js") }}"></script>
+    <script type="application/javascript"
+            src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
+    <script>
+        //模态框居中
+        $("[data-toggle='modal']").click(function () {
+            var _target = $(this).attr('data-target')
+            t = setTimeout(function () {
+                var _modal = $(_target).find(".modal-dialog")
+                _modal.animate({'margin-top': parseInt(($(window).height() - _modal.height()) / 2)}, 300)
+            }, 200)
+        });
+        //清空表单
+        $("[data-toggle='modal']").click(function () {
+            //清空验证
+            $('#test2').data('bootstrapValidator').resetForm(true);
+            document.getElementById("test2").reset();
+        });
+
+        $(function () {
+            $("#test2").bootstrapValidator({
+                message: 'This value is not valid',
+                feedbackIcons: {
+                    /*input状态样式图片*/
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    email: {
+                        message: '邮箱验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '用户名不能为空'
+                            },
+                        }
+                    },
+                    pop_server: {
+                        message: 'pop_server验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '不能为空'
+                            }
+                        }
+                    },
+                    pop_port: {
+                        message: 'pop_port验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '不能为空'
+                            }
+                        }
+                    },
+                    smtp_server: {
+                        message: 'smtp_server验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '不能为空'
+                            }
+                        }
+                    },
+                    smtp_port: {
+                        message: 'smtp_port验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '不能为空'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        var table = $('#example1').DataTable({
+            "deferRender": true,
+            "ajax": {
+                type: 'Post',
+                data: {"type": "query_emailserver"},
+                url: "{{ url_for('main.email_edit') }}"
+            },
+            "iDisplayLength": 25,
+            "language": {
+                "sProcessing": "处理中...",
+                "sLengthMenu": "显示 _MENU_ 项结果",
+                "sZeroRecords": "没有匹配结果",
+                "sInfo": "显示第 _START_ 至 _END_ 项结果，共 _TOTAL_ 项",
+                "sInfoEmpty": "显示第 0 至 0 项结果，共 0 项",
+                "sInfoFiltered": "(由 _MAX_ 项结果过滤)",
+                "sInfoPostFix": "",
+                "sSearch": "搜索:",
+                "sUrl": "",
+                "sEmptyTable": "表中数据为空",
+                "sLoadingRecords": "载入中...",
+                "sInfoThousands": ",",
+                "oPaginate": {
+                    "sFirst": "首页",
+                    "sPrevious": "上页",
+                    "sNext": "下页",
+                    "sLast": "末页"
+                },
+                "oAria": {
+                    "sSortAscending": ": 以升序排列此列",
+                    "sSortDescending": ": 以降序排列此列"
+                }
+            },
+            "columns": [
+                {"data": "id", "orderable": false, "searchable": false},
+                {"data": "email"},
+                {"data": "pop", "orderable": false, "searchable": false},
+                {"data": "pop_port", "orderable": false, "searchable": false},
+                {"data": "smtp", "orderable": false, "searchable": false},
+                {"data": "smtp_port", "orderable": false, "searchable": false}
+            ],
+        });
+        $('#save').on('click', function () {
+            var bootstrapValidator = $('#test2').data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if (bootstrapValidator.isValid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('main.queryemail_server') }}",
+                    data: $('#test2').serialize(),
+                    success: function (res) {
+                        if (res.status == 'success') {
+                            table.ajax.reload();
+                            $('#myModal').modal('hide')
+                            layer.msg("提交成功");
+                            console.log("提交成功")
+                        }
+                        else {
+                            alert("后端返回错误！" +
+                                "无法提交到后台")
+                        }
+                    },
+                    error: function (res) {
+                        alert("出错！无法提交到后台")
+                    }
+                });
+            }
+            else {
+                layer.msg("表单验证失败！");
+            }
+        });
+    </script>
+{% endblock scripts %}
