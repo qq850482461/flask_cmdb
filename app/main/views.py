@@ -16,34 +16,79 @@ def page_not_found(error):
     return render_template('403.html', title='403'), 403
 
 
+# 主页
 @main.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
     return render_template('index.html', name="test")
 
 
-# 邮箱查询页面
-@main.route('/email', methods=['GET', 'POST'])
-@login_required
-def email():
-    return render_template('email.html')
-
-
 # 邮箱服务器管理页面
 @main.route('/email_edit', methods=['GET', 'POST'])
 @login_required
 def email_edit():
+    return render_template('email_server.html')
+
+
+# 获取邮箱服务器和删除服务器API接口
+@main.route('/api/email_server', methods=['GET', 'POST'])
+@login_required
+def email_server():
+    # 查询所有datatables
     datatables = {"data": None}
     query = []
-    if request.method == "POST":
-        if request.form['type'] == "query_emailserver":
-            emailserver = Emailserver.query.all()
-            for i in emailserver:
-                value = {"id":i.id, "email":i.name,"pop":i.pop,"pop_port":i.pop_port,"smtp":i.smtp,"smtp_port":i.smtp_port}
-                query.append(value)
-            datatables["data"] = query
-            return jsonify(datatables)
-    return render_template('email_server.html')
+    if request.method == "GET":
+        emailserver = Emailserver.query.all()
+        for i in emailserver:
+            value = {"id": i.id, "email": i.name, "pop": i.pop, "pop_port": i.pop_port, "smtp": i.smtp,
+                     "smtp_port": i.smtp_port}
+            query.append(value)
+        datatables["data"] = query
+        return jsonify(datatables)
+    # 新增datatables
+    if request.method == 'POST':
+        email = request.form['email']
+        id = request.form['id']
+        # 根据ID判断是新增还是修改
+        if email is not None and id == '0':
+            email_server = Emailserver(name=email, pop=request.form['pop_server'], pop_port=request.form['pop_port'],
+                                       smtp=request.form['smtp_server'], smtp_port=request.form['smtp_port'])
+            db.session.add(email_server)
+            db.session.commit()
+            return jsonify({"status": "success"})
+        elif id != '0':
+            # update方法需要是basequery对象
+            email_server = Emailserver.query.filter_by(id=int(id))
+            email_server.update(
+                {'name': request.form['email'], 'pop': request.form['pop_server'], 'pop_port': request.form['pop_port'],
+                 'smtp': request.form['smtp_server'], 'smtp_port': request.form['smtp_port']})
+            db.session.commit()
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "failed"})
+
+
+# 删除emailserver的接口
+@main.route('/api/email_server/delete', methods=['POST'])
+@login_required
+def delete_email_server():
+    if request.method == 'POST':
+        id = request.form['id']
+        email_server = Emailserver.query.get(id)
+        if id and email_server is not None:
+            db.session.delete(email_server)
+            db.session.commit()
+            return jsonify({"status": "success"})
+        else:
+            return jsonify({"status": "failed"})
+
+
+# 邮箱查询页面
+@main.route('/email', methods=['GET', 'POST'])
+@login_required
+def email():
+    email_server = Emailserver.query.all()
+    return render_template('email.html', email_server=email_server)
 
 
 # 邮箱查询接口
@@ -51,38 +96,38 @@ def email_edit():
 @login_required
 def queryemail():
     rep = {"data": None}
+    all_servers = Emailserver.query.all()
+    email_server = {}
+    demo = {"id": None, "email": None, "password": None, "description": None, "pop": None,
+            "pop_port": None, "smtp": None, "smtp_port": None}
+    # 获得对应的字典
+    for i in all_servers:
+        email_server[i.name] = i.email
+    # 前端传来select的值，进行分类
     if request.method == 'POST':
         value = request.form['type']
-        print(value)
-        if value == "选项1":
-            test = [{"id": '66', "email": "选项1@test.com", "password": "66", "description": "TEST", "pop": "POP",
-                     "pop_port": 995, "smtp": "SMTP", "smtp_port": 58},
-                    {"id": '77', "email": "771@test.com", "password": "66", "description": "TEST", "pop": "POP",
-                     "pop_port": 57,
-                     "smtp": "SMTP", "smtp_port": 58}]
-            rep['data'] = test
+        if value == 'all':
+            rep["data"] = demo
             return jsonify(rep)
-    test = [{"id": '7', "email": "fanny@tangdynastytours.com", "password": "Tdt2017..", "description": "TEST",
-             "pop": "pop.fastmail.com", "pop_port": 995, "smtp": "smtp.fastmail.com", "smtp_port": 465},
-            {"id": '6', "email": "test@test.com", "password": "66", "description": "TEST", "pop": "POP", "pop_port": 57,
-             "smtp": "SMTP", "smtp_port": 58}]
-    rep['data'] = test
-    return jsonify(rep)
-
-
-# 邮箱服务器更新
-@main.route('/api/queryemail_server', methods=['GET', 'POST'])
-@login_required
-def queryemail_server():
-    rep = {"status": "success"}
-    if request.method == 'POST':
-        email = request.form['email']
-        if email is not None:
-            email_server = Emailserver(name=email, pop=request.form['pop_server'], pop_port=request.form['pop_port'],
-                                       smtp=request.form['smtp_server'], smtp_port=request.form['smtp_port'])
-            db.session.add(email_server)
-            db.session.commit()
+        elif value in email_server:
+            data = []
+            # 转换json对象
+            for i in list(email_server[value]):
+                y = i.email_server
+                x = {"id": i.id, "email": i.email, "password": i.password, "description": i.description, "pop": y.pop,
+            "pop_port": y.pop_port, "smtp": y.smtp, "smtp_port": y.smtp_port}
+                data.append(x)
+            rep['data'] = data
             return jsonify(rep)
         else:
-            return jsonify({"status": "failed"})
+            return jsonify(rep)
 
+#邮箱增加修改接口
+@main.route('/api/add_email', methods=['GET', 'POST'])
+@login_required
+def add_email():
+    if request.method == "POST":
+        email_server = request.form['select_email']
+        id = request.form['id']
+
+        return jsonify({"status": "success"})

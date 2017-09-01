@@ -22,8 +22,9 @@
                         <div class="col-md-3">
                             <select id='select_email' class="select2" style="width: 100%;">
                                 <option disabled selected value></option>
-                                <option>选项1</option>
-                                <option>选项2</option>
+                                {% for i in email_server %}
+                                    <option>{{ i.name }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-">
@@ -93,11 +94,12 @@
                                         <span>邮箱服务器</span>
                                     </label>
                                     <div class="col-sm-8">
-                                        <select name="select_email" id='select_email' class="select2"
+                                        <select name="select_email" id='select_email_modal' class="select2"
                                                 style="width: 100%;">
                                             <option disabled selected value></option>
-                                            <option>选项1</option>
-                                            <option>选项2</option>
+                                            {% for i in email_server %}
+                                                <option>{{ i.name }}</option>
+                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -122,7 +124,7 @@
     {{ super() }}
     <!-- DataTables -->
     <script type="application/javascript"
-            src="{{ url_for('static',filename='bower_components/datatables.net/js/jquery.dataTables.min.js') }}"
+            src="{{ url_for('static',filename='bower_components/datatables.net/js/jquery.dataTables.js') }}"
     ></script>
     <script type="application/javascript"
             src="{{ url_for('static',filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js') }}"
@@ -137,7 +139,7 @@
         //初始化select2选项卡
         var select2 = $('.select2').select2({
             placeholder: '请选择邮箱类型',
-            allowClear: true
+            //allowClear: true
         })
 
         //初始化DataTable
@@ -163,7 +165,7 @@
             },
             "ajax": {
                 type: 'Post',
-                data: {"type": "默认传递"},
+                data: {"type": "all"},
                 url: "{{ url_for('main.queryemail') }}"
             },
             "columns": [
@@ -200,6 +202,17 @@
                     "sSortAscending": ": 以升序排列此列",
                     "sSortDescending": ": 以降序排列此列"
                 }
+            }
+        });
+
+        //选中行
+        $('#example1 tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
             }
         });
 
@@ -256,42 +269,76 @@
             table.ajax.reload();
         });
 
-        //选中行
-        $('#example1 tbody').on('click', 'tr', function () {
-            if ($(this).hasClass('selected')) {
-                $(this).removeClass('selected');
-            }
-            else {
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-            }
-        });
 
         //清空模态框
         function clear() {
-            $("input[name='email']").val("");
-            $("input[name='password']").val("");
-            $("input[name='description']").val("");
-            //清空select2
-            select2.val(null).trigger("change");
+            //js重置表单
+            document.getElementById("test2").reset();
+            //更改模态框名字
+            $("#modal-title").text("新增邮箱");
+            //清空模态框的select
+            $('#select_email_modal').val(null).trigger("change");
+            //清空验证
+            $('#test2').data('bootstrapValidator').resetForm(true);
+        }
+
+        //同步select
+        function select_sync() {
+            var checkValue = $("#select_email").val();
+            if (checkValue != null) {
+                $('#select_email_modal').val(checkValue).trigger("change");
+            }
         }
 
         //添加按钮
         $('#add_email').on('click', function () {
-            $("#modal-title").text("新增邮箱");
+            //去除选中行效果
+            table.$('tr.selected').removeClass('selected');
             clear()
-            //清空验证
-            $('#test2').data('bootstrapValidator').resetForm(true);
+            select_sync()
             $("#myModal").modal("show");
-
-
         });
+
         //提交按钮
         $('#save').on('click', function () {
             var bootstrapValidator = $('#test2').data('bootstrapValidator');
             bootstrapValidator.validate();
+
+            //表单数据增加id，后端可以根据ID进行判断
+            function data() {
+                var values = $('#test2').serialize()
+                var selected = table.row('.selected').data()
+                if (typeof(selected) == 'undefined') {
+                    values = $('#test2').serialize() + '&id=0'
+                    return values
+                }
+                else {
+                    var id_data = values + '&id=' + selected.id
+                    return id_data
+                }
+            }
+            //判断bootstrapValidator是否通过验证进行ajax提交表单
             if (bootstrapValidator.isValid()) {
-                layer.msg("doSomething");
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('main.add_email') }}",
+                    data: data(),
+                    success: function (res) {
+                        if (res.status == 'success') {
+                            table.ajax.reload();
+                            $('#myModal').modal('hide')
+                            layer.msg("提交成功");
+                        }
+                        else {
+                            alert("后端返回错误！" +
+                                "无法提交到后台")
+                        }
+                    },
+                    error: function () {
+                        alert("出错！无法提交请求到后端")
+                    }
+                });
+                //console.log(data())
             }
             else {
                 layer.msg("表单验证失败！");
@@ -305,8 +352,7 @@
             }
             else {
                 clear()
-                $('#test2').data('bootstrapValidator').resetForm(true);
-
+                select_sync()
                 //进行edit更新赋值
                 $("#modal-title").text("修改" + selected.email);
                 $("input[name='email']").val(selected.email);
@@ -327,7 +373,7 @@
                     btn: ['删除', '取消'] //可以无限个按钮
                     ,
                 }, function () {
-                    console.log("test")
+                    console.log(selected.email)
                     //做一些事情。。
                 }, function () {
                 });

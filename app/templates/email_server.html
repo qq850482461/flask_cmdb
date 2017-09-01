@@ -128,11 +128,20 @@
                 _modal.animate({'margin-top': parseInt(($(window).height() - _modal.height()) / 2)}, 300)
             }, 200)
         });
-        //清空表单
-        $("[data-toggle='modal']").click(function () {
-            //清空验证
+
+        //重置模态框
+        function clear() {
             $('#test2').data('bootstrapValidator').resetForm(true);
             document.getElementById("test2").reset();
+            $("#modal-title").text("添加服务器");
+        }
+
+        //清空表单
+        $("[data-toggle='modal']").click(function () {
+            //点击添加按钮的时候移除选中行效果
+            table.$('tr.selected').removeClass('selected');
+            //清空验证
+            clear()
         });
 
         $(function () {
@@ -192,9 +201,8 @@
         var table = $('#example1').DataTable({
             "deferRender": true,
             "ajax": {
-                type: 'Post',
-                data: {"type": "query_emailserver"},
-                url: "{{ url_for('main.email_edit') }}"
+                type: 'Get',
+                url: "{{ url_for('main.email_server') }}"
             },
             "iDisplayLength": 25,
             "language": {
@@ -230,28 +238,108 @@
                 {"data": "smtp_port", "orderable": false, "searchable": false}
             ],
         });
+
+        //选中行
+        $('#example1 tbody').on('click', 'tr', function () {
+            if ($(this).hasClass('selected')) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        });
+
+        //删除按钮
+        $('#delete_email').on('click', function () {
+            var selected = table.row('.selected').data()
+            if (typeof(selected) == 'undefined') {
+                layer.msg("没有选中任何对象");
+            }
+            else {
+                layer.confirm('是否确定删除:' + selected.email, {
+                    btn: ['删除', '取消'] //可以无限个按钮
+                    ,
+                }, function () {
+                    $.ajax({
+                        type: "POST",
+                        data: {"id": selected.id},
+                        url: "{{ url_for('main.delete_email_server') }}",
+                        success: function (rep) {
+                            if (rep.status == 'success') {
+                                table.ajax.reload();
+                                layer.msg("删除成功");
+                            }
+                            else {
+                                alert("后端返回错误！" +
+                                    "无法提交到后台")
+                            }
+                        },
+                        error: function () {
+                            alert("出错！无法提交到后台")
+                        }
+                    });
+                }, function () {
+                });
+            }
+        });
+
+        //修改按钮
+        $('#edit_email').on('click', function () {
+
+            var selected = table.row('.selected').data()
+            if (typeof(selected) == 'undefined') {
+                layer.msg("请先选择一行");
+            }
+            else {
+                clear()
+                //进行修改框更新赋值
+                $("#modal-title").text("修改" + selected.email);
+                $("input[name='email']").val(selected.email);
+                $("input[name='pop_server']").val(selected.pop);
+                $("input[name='pop_port']").val(selected.pop_port);
+                $("input[name='smtp_server']").val(selected.smtp);
+                $("input[name='smtp_port']").val(selected.smtp_port);
+                $("#myModal").modal("show");
+            }
+        });
+
+
+        // 提交更新
         $('#save').on('click', function () {
+            //手动验证bootstrapValidator的结果,这两句代码不能少一句。
             var bootstrapValidator = $('#test2').data('bootstrapValidator');
             bootstrapValidator.validate();
+            function data () {
+                var values = $('#test2').serialize()
+                var selected = table.row('.selected').data()
+                if (typeof(selected) == 'undefined') {
+                    values = $('#test2').serialize() + '&id=0'
+                    return values
+                }
+                else {
+                    var id_data = values + '&id=' + selected.id
+                    return id_data
+                }
+            }
             if (bootstrapValidator.isValid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ url_for('main.queryemail_server') }}",
-                    data: $('#test2').serialize(),
+                    url: "{{ url_for('main.email_server') }}",
+                    data: data(),
                     success: function (res) {
                         if (res.status == 'success') {
                             table.ajax.reload();
                             $('#myModal').modal('hide')
                             layer.msg("提交成功");
-                            console.log("提交成功")
                         }
                         else {
                             alert("后端返回错误！" +
                                 "无法提交到后台")
                         }
                     },
-                    error: function (res) {
-                        alert("出错！无法提交到后台")
+                    error: function () {
+                        alert("出错！无法提交请求到后端")
                     }
                 });
             }
