@@ -84,3 +84,16 @@ class Email(db.Model):
 
     def __repr__(self):
         return "<Email_id:{0}>".format(self.id)
+
+# 邮箱存放表
+class EmailDomain(db.Model):
+    __tablename__ = 'emaildomain'
+    id = db.Column(db.Integer(), primary_key=True)
+    email = db.Column(db.String(80))
+    operator = db.Column(db.String(80))
+    username = db.Column(db.String(80))
+    password = db.Column(db.String(80))
+    created = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return "<emaildomain_id:{0}>".format(self.id)

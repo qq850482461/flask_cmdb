@@ -20,8 +20,8 @@
                 <div class="box-header">
                     <div class="row">
                         <div class="col-md-3">
-                            <select id='select_email' class="select2" style="width: 100%;">
-                                <option disabled selected value></option>
+                            <select id='select_sever' class="select2" style="width: 100%;">
+                                <!--<option disabled selected value></option>-->
                                 {% for i in email_server %}
                                     <option>{{ i.name }}</option>
                                 {% endfor %}
@@ -153,19 +153,19 @@
                 if (pop == "995") {
                     $('td', row).eq(5).prepend('<span class="badge bg-green">SSL</span>&nbsp;');
                 }
-                else {
-                    $('td', row).eq(5).prepend('<span class="badge bg-light-blue">TLS</span>&nbsp;');
-                }
                 if (smtp == "465") {
                     $('td', row).eq(7).prepend('<span class="badge bg-green">SSL</span>&nbsp;');
                 }
-                else {
-                    $('td', row).eq(7).prepend('<span class="badge bg-light-blue">TLS</span>&nbsp;');
-                }
+
             },
             "ajax": {
                 type: 'Post',
-                data: {"type": "all"},
+                data: {
+                    "type": function () {
+                        var value = $("#select_sever").val();
+                        return value
+                    }
+                },
                 url: "{{ url_for('main.queryemail') }}"
             },
             "columns": [
@@ -260,8 +260,8 @@
         });
 
         //邮箱选择分类
-        $('#select_email').change(function () {
-            var checkValue = $("#select_email").val();
+        $('#select_sever').change(function () {
+            var checkValue = $("#select_sever").val();
             console.log(checkValue)
             var data = {'type': checkValue}
             //动态修改参数传给服务器
@@ -284,7 +284,7 @@
 
         //同步select
         function select_sync() {
-            var checkValue = $("#select_email").val();
+            var checkValue = $("#select_sever").val();
             if (checkValue != null) {
                 $('#select_email_modal').val(checkValue).trigger("change");
             }
@@ -317,8 +317,10 @@
                     return id_data
                 }
             }
+
             //判断bootstrapValidator是否通过验证进行ajax提交表单
             if (bootstrapValidator.isValid()) {
+                console.log(data())
                 $.ajax({
                     type: "POST",
                     url: "{{ url_for('main.add_email') }}",
@@ -338,7 +340,6 @@
                         alert("出错！无法提交请求到后端")
                     }
                 });
-                //console.log(data())
             }
             else {
                 layer.msg("表单验证失败！");
@@ -373,8 +374,24 @@
                     btn: ['删除', '取消'] //可以无限个按钮
                     ,
                 }, function () {
-                    console.log(selected.email)
-                    //做一些事情。。
+                    $.ajax({
+                        type: "POST",
+                        data: {"id": selected.id},
+                        url: "{{ url_for('main.delete_email') }}",
+                        success: function (rep) {
+                            if (rep.status == 'success') {
+                                table.ajax.reload();
+                                layer.msg("删除成功");
+                            }
+                            else {
+                                alert("后端返回错误！" +
+                                    "无法提交到后台")
+                            }
+                        },
+                        error: function () {
+                            alert("出错！无法提交到后台")
+                        }
+                    });
                 }, function () {
                 });
             }
@@ -382,16 +399,30 @@
 
         //预览配置
         $('#preview_email').on('click', function () {
-            var str = "test"
-            layer.open({
-                type: 1,
-                area: ['400px', '300px'],
-                skin: 'layui-layer-molv', //样式类名
-                closeBtn: 1, //不显示关闭按钮
-                anim: 2,
-                shadeClose: true, //开启遮罩关闭
-                content: str
-            });
+            var selected = table.row('.selected').data()
+            if (typeof(selected) == 'undefined') {
+                layer.msg("没有选中任何对象");
+            }
+            else {
+
+                var text = '<div style="padding:20px">' + '邮箱:' + selected.email + "<br>"
+                    + '密码:' + selected.password + "<br>"
+                    + '备注:' + selected.description + "<br>"
+                    + "-------------------------------" + "<br>"
+                    + 'pop服务器:' + selected.pop + '端口' + selected.pop_port + "<br>"
+                    + 'smtp服务器:' + selected.smtp + '端口' + selected.smtp_port + "<br>"
+                '</div>'
+                layer.open({
+                    type: 1,
+                    area: ['305px', '230px'],
+                    skin: 'layui-layer-molv', //样式类名
+                    closeBtn: 0, //不显示关闭按钮
+                    anim: 2,
+                    shadeClose: true, //开启遮罩关闭
+                    content: text
+                });
+            }
+
         });
     </script>
 {% endblock %}

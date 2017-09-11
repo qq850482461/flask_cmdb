@@ -222,10 +222,11 @@
                 $(".help-block").remove();
             }
             //提交表单
+            console.log($('#test').serialize())
             $.ajax({
                 type: "POST",
                 url: "{{ url_for('auth.adduser') }}",
-                data: $('.form-horizontal').serialize(),
+                data: $('#test').serialize(),
                 success: function (res) {
                     if (res.message == "error") {
                         $("#user").addClass("has-error");

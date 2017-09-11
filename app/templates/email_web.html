@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <!-- layui样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">
+    <!-- 验证样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                运营商管理
+                <small>运营商页面</small>
+            </h1>
+        </section>
+        <section class="content">
+            <div class="box">
+                <div class="box-header">
+                    <button id="add" class="btn btn-success" data-toggle="modal" data-target="#myModal">添加</button>
+                    <button id="del" class="btn btn-danger">删除</button>
+                </div>
+                <div class="box-body">
+                    <table id="demo" lay-filter="test"></table>
+                </div>
+            </div>
+            <!--弹出模态框-->
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <div class="modal-title">
+                                <span id="modal-title">添加服务器</span>
+                            </div>
+                        </div>
+                        <div class="modal-body">
+                            <form id="add_user" class="form-horizontal">
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>邮箱域名</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" name="email">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>运营商</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="operator">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>帐号</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="username">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>密码</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="password">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">
+                                关闭
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="save">
+                                提交
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock content %}
+{% block scripts %}
+    {{ super() }}
+    <!-- layui的js -->
+    <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
+    <!-- 验证样式validator的js -->
+    <script src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
+    <script>
+        //模态框居中
+        $("[data-toggle='modal']").click(function () {
+            var _target = $(this).attr('data-target')
+            t = setTimeout(function () {
+                var _modal = $(_target).find(".modal-dialog")
+                _modal.animate({'margin-top': parseInt(($(window).height() - _modal.height()) / 2)}, 300)
+            }, 200)
+        });
+
+        //验证表单
+        $(function () {
+            $("#add_user").bootstrapValidator({
+                message: '这个值是无效的',
+                feedbackIcons: {
+                    /*input状态样式图片*/
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    email: {
+                        message: '邮箱验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '用户名不能为空'
+                            },
+                        }
+                    },
+                    username: {
+                        message: 'username验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '不能为空'
+                            }
+                        }
+                    },
+                    password: {
+                        message: 'password验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '不能为空'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        //每次点击清空表单
+        $("[data-toggle='modal']").click(function () {
+            //清空验证
+            document.getElementById("add_user").reset();
+            $('#add_user').data('bootstrapValidator').resetForm(true);
+        });
+
+
+        //layui.use('table', function () {
+        var table = layui.table;
+
+        //方法级渲染
+        table.render({
+            elem: '#demo', //指定原始表格元素选择器（推荐id选择器）
+            id: 'lzh', //设定容器唯
+            url: '{{ url_for('main.query_email_web') }}',
+            skin: 'row', //列边框风格
+            even: true, //开启隔行背景
+            //data: [{'id': 66, 'email': '456465'}, {'id': 67, 'email': '456465'}],
+            //标题栏
+            cols: [[
+                {checkbox: true},
+                {field: 'id', title: 'ID', width: 150},
+                {field: 'email', title: '邮箱域名', sort: true, edit: 'text', width: 300},
+                {field: 'operator', title: '运营商', sort: true, edit: 'text', width: 200},
+                {field: 'username', title: '帐号', edit: 'text', width: 300},
+                {field: 'password', title: '密码', edit: 'text', width: 300},
+                {field: 'created', title: '修改时间', width: 300}
+            ]],
+        });
+
+        //监听单元格编辑
+        table.on('edit(test)', function (obj) {
+            //console.log(obj)
+            var value = obj.value //得到修改后的值
+                , data = obj.data //得到所在行所有键值
+                , field = obj.field; //得到字段
+            console.log(data)
+            $.ajax({
+                url: "{{ url_for('main.email_web') }}",
+                type: "POST",
+                data: data,//jquery支持object对象类型
+                success: function (rep) {
+                    if (rep.status == 'success') {
+                        console.log('修改成功')
+                        layer.msg('[ID: ' + data.id + '] ' + field + ' 字段更改为：' + value);
+                        table.reload('lzh');
+                    }
+                    else {
+                        alert("后端返回错误！")
+                    }
+                },
+                error: function () {
+                    alert("出错！前端出错")
+                }
+            });
+        });
+
+        // 提交更新
+        $('#save').on('click', function () {
+            //手动验证bootstrapValidator的结果,这两句代码不能少一句。
+            var bootstrapValidator = $('#add_user').data('bootstrapValidator');
+            bootstrapValidator.validate();
+
+            if (bootstrapValidator.isValid()) {
+                var data = $('#add_user').serialize()
+                console.log(data + "&id=0")
+                $.ajax({
+                    url: "{{ url_for('main.email_web') }}",
+                    type: "POST",
+                    data: data + "&id=0",
+                    success: function (rep) {
+                        if (rep.status == 'success') {
+                            layer.msg("提交成功");
+                            table.reload('lzh');
+                        }
+                        else {
+                            alert("后端返回错误！")
+                        }
+                    },
+                    error: function () {
+                        alert("出错！前端出错")
+                    }
+                });
+
+                $('#myModal').modal('hide')
+                layer.msg("提交后台成功");
+            }
+            else {
+                layer.msg("表单验证失败！");
+            }
+        });
+
+        // 删除按钮
+        $('#del').on('click', function () {
+            var checkStatus = table.checkStatus('lzh')
+            var data = checkStatus.data;
+
+            if (data.length == 0) {
+                layer.msg("你需要选一点什么!")
+            }
+            else {
+                layer.confirm('是否确定删除选中的内容?', {
+                    btn: ['删除', '取消'] //方法按顺序回调
+                    ,
+                }, function () {
+                    var lists = new Array()
+                    for (var i = 0; i < data.length; i++) {
+                        lists.push(data[i].id)
+                    }
+                    console.log(lists)
+                    //layer.alert(JSON.stringify(data));
+                    $.ajax({
+                        url: "{{ url_for('main.delete_email_web') }}",
+                        type: "POST",
+                        traditional: true, //取消深度序列化
+                        data: {"id": lists},
+                        success: function (rep) {
+                            if (rep.status == 'success') {
+                                layer.msg("提交成功");
+                                table.reload('lzh');
+                            }
+                            else {
+                                alert("后端返回错误！")
+                            }
+                        },
+                        error: function () {
+                            alert("出错！前端出错")
+                        }
+                    });
+                }, function () {
+                });
+            }
+        })
+        // });
+    </script>
+{% endblock %}
