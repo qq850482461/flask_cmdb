@@ -3,6 +3,7 @@ from flask import render_template, redirect, jsonify, request
 from flask_login import login_required
 from .. import db, admin_permission
 from ..models import Email, Emailserver, EmailDomain
+from datetime import datetime
 
 
 # 自己定义一个错误页面传入错误代码,如果不是蓝图就是用errorhandler
@@ -20,7 +21,7 @@ def page_not_found(error):
 @main.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    return render_template('index.html', name="test")
+    return render_template('index.html', name="将来会放一些监控?内容吧")
 
 
 # 邮箱运营商web页面,增加修改运营商页面
@@ -31,11 +32,12 @@ def email_web():
     if request.method == "POST":
 
         id = request.form['id']
-        #新增
+        # 新增
         if id == '0':
             account = EmailDomain(
                 email=request.form['email'],
                 operator=request.form['operator'],
+                web=request.form['web'],
                 username=request.form['username'],
                 password=request.form['password'],
             )
@@ -47,9 +49,9 @@ def email_web():
             account = EmailDomain.query.get(int(id))
             account.email = request.form['email']
             account.operator = request.form['operator']
+            account.web = request.form['web']
             account.username = request.form['username']
             account.password = request.form['password']
-
             db.session.add(account)
             db.session.commit()
 
@@ -72,6 +74,7 @@ def query_email_web():
             'id': i.id,
             'email': i.email,
             'operator': i.operator,
+            'web': i.web,
             'username': i.username,
             'password': i.password,
             'created': i.created

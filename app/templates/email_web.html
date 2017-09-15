@@ -54,6 +54,14 @@
                                 </div>
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">
+                                        <span>web地址</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input class=" form-control" name="web">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
                                         <span>帐号</span>
                                     </label>
                                     <div class="col-sm-8">
@@ -115,7 +123,15 @@
                         message: '邮箱验证失败',
                         validators: {
                             notEmpty: {
-                                message: '用户名不能为空'
+                                message: '地址不能为空'
+                            },
+                        }
+                    },
+                    web: {
+                        message: 'web证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '地址不能为空'
                             },
                         }
                     },
@@ -162,21 +178,20 @@
             cols: [[
                 {checkbox: true},
                 {field: 'id', title: 'ID', width: 150},
-                {field: 'email', title: '邮箱域名', sort: true, edit: 'text', width: 300},
+                {field: 'email', title: '邮箱域名', sort: true, edit: 'text', width: 200},
                 {field: 'operator', title: '运营商', sort: true, edit: 'text', width: 200},
-                {field: 'username', title: '帐号', edit: 'text', width: 300},
-                {field: 'password', title: '密码', edit: 'text', width: 300},
+                {field: 'web', title: 'web地址', edit: 'text', width: 300},
+                {field: 'username', title: '帐号', edit: 'text', width: 200},
+                {field: 'password', title: '密码', edit: 'text', width: 200},
                 {field: 'created', title: '修改时间', width: 300}
             ]],
         });
 
         //监听单元格编辑
         table.on('edit(test)', function (obj) {
-            //console.log(obj)
             var value = obj.value //得到修改后的值
                 , data = obj.data //得到所在行所有键值
                 , field = obj.field; //得到字段
-            console.log(data)
             $.ajax({
                 url: "{{ url_for('main.email_web') }}",
                 type: "POST",

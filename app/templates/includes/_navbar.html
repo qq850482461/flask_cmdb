@@ -17,30 +17,14 @@
         <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
                 {% if current_user.is_authenticated %}
-                    <li class="dropdown user user-menu">
-                        <!-- Menu Toggle Button -->
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                            <span class="hidden-xs">{{ current_user.username }}</span>
-                        </a>
-                        <ul class="dropdown-menu">
-                            </li>
-                            <!-- Menu Footer-->
-                            <li class="user-footer">
-                                <div class="pull-left">
-                                    <a href="{{ url_for('auth.resetpw') }}" class="btn btn-default btn-flat">改密码</a>
-                                </div>
-                                <div class="pull-right">
-                                    <a href="{{ url_for('auth.logout') }}" class="btn btn-default btn-flat">注销</a>
-                                </div>
-                            </li>
-                        </ul>
-                    </li>
-                {% else %}
-                    <li class="dropdown user user-menu">
-                        <a href="{{ url_for('auth.login') }}">
-                            <span class="hidden-xs">请登录</span>
-                        </a>
-                    </li>
+                    <div class="navbar-custom-menu">
+                        <div style="padding:15px;color:#f4f4f4">
+                            <span>{{ current_user.username }}</span>&nbsp;<i class="fa fa-user"></i>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <a href="{{ url_for('auth.logout') }}" style="color:#f4f4f4;font-size:13px;">
+                                <span class="fa fa-sign-out">退出</span>
+                            </a>
+                        </div>
+                    </div>
                 {% endif %}
             </ul>
         </div>

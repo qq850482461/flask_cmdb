@@ -52,7 +52,9 @@ def create_app():
     # 注册蓝图
     from .main import main as main_blueprint
     from .auth import auth as auth_blueprint
+    from .property import property as property_blueprint
     app.register_blueprint(main_blueprint)
     app.register_blueprint(auth_blueprint)
+    app.register_blueprint(property_blueprint)
 
     return app

@@ -21,7 +21,7 @@ def login():
         password = request.form['password']
         check = request.form.get('check')
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password_hash(password):
+        if user is not None and user.check_password_hash(password):
             if check:
                 login_user(user,remember=True)
             else:

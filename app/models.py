@@ -90,6 +90,7 @@ class EmailDomain(db.Model):
     __tablename__ = 'emaildomain'
     id = db.Column(db.Integer(), primary_key=True)
     email = db.Column(db.String(80))
+    web = db.Column(db.String(80))
     operator = db.Column(db.String(80))
     username = db.Column(db.String(80))
     password = db.Column(db.String(80))

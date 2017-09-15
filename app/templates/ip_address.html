@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <!-- layui样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">
+    <!-- 验证样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
+{% endblock %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                IP地址管理
+                <small>IP地址使用情况</small>
+            </h1>
+        </section>
+        <section class="content">
+            <div class="box">
+                <div class="box-header">
+                    <button id="add_email" class="btn btn-success">批量可用</button>
+                    <button id="edit_email" class="btn btn-success">批量不可用</button>
+                    <button id="delete_email" class="btn btn-danger">批量删除</button>
+                    <div class="layui-inline">
+                        <input class="layui-input" name="id" id="demoReload" autocomplete="off">
+                    </div>
+                    <button class="layui-btn" data-type="reload">搜索</button>
+                </div>
+                <div class="box-body">
+                    <table id="demo" lay-filter="test"></table>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock content %}
+{% block scripts %}
+    {{ super() }}
+    <script type="text/html" id="moban">
+        {% raw %}
+        {{#  if(d.usable === 'True'){ }}
+        <span class="label label-success">可用</span>
+        {{#  } else { }}
+        <span class="label label-danger">不可用</span>
+        {{#  } }}
+        {% endraw %}
+    </script>
+    <!-- layui的js -->
+    <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
+    <script>
+
+        //初始化表单
+        var table = layui.table;
+
+        //方法级渲染
+        table.render({
+            elem: '#demo', //指定原始表格元素选择器（推荐id选择器）
+            id: 'lzh', //设定容器唯
+            skin: 'row', //列边框风格
+            even: true, //开启隔行背景
+            data: [{'id': 1, 'ip': '192.168.1.2', usable: 'True', hostname: '服务器A'}, {
+                'id': 2,
+                'ip': '192.168.1.3',
+                usable: 'False',
+                hostname: '服务器B'
+            }],
+            //标题栏
+            cols: [[
+                {checkbox: true},
+                {field: 'id', title: 'ID', width: 150},
+                {field: 'ip', title: 'IP地址', sort: true, edit: 'text', width: 200},
+                {field: 'usable', title: '是否已用', sort: true, width: 200, templet: '#moban'},
+                {field: 'hostname', title: '主机名', width: 300},
+                {field: 'onlien', title: '是否在线', sort: true, width: 300},
+            ]],
+            page: true,
+        });
+
+    </script>
+
+{% endblock scripts %}
