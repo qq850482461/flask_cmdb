@@ -27,7 +27,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-">
+                        <div class="col-md-6">
                             <button id="add_email" class="btn btn-success">添加</button>
                             <button id="edit_email" class="btn btn-success">修改</button>
                             <button id="delete_email" class="btn btn-danger">删除</button>
@@ -320,7 +320,7 @@
 
             //判断bootstrapValidator是否通过验证进行ajax提交表单
             if (bootstrapValidator.isValid()) {
-                console.log(data())
+                //console.log(data())
                 $.ajax({
                     type: "POST",
                     url: "{{ url_for('main.add_email') }}",

@@ -46,6 +46,7 @@ def email_web():
             return jsonify({"status": "success"})
         # 修改
         elif id != '0':
+
             account = EmailDomain.query.get(int(id))
             account.email = request.form['email']
             account.operator = request.form['operator']
@@ -81,10 +82,9 @@ def query_email_web():
         }
         data.append(x)
     rep['data'] = data
-    return jsonify(rep)
+    return jsonify(rep)  # 邮箱运营商管理帐号密码,删除接口
 
 
-# 邮箱运营商管理帐号密码,删除接口
 @main.route('/api/email_web/delete', methods=['GET', 'POST'])
 @login_required
 def delete_email_web():
