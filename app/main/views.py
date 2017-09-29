@@ -46,7 +46,6 @@ def email_web():
             return jsonify({"status": "success"})
         # 修改
         elif id != '0':
-
             account = EmailDomain.query.get(int(id))
             account.email = request.form['email']
             account.operator = request.form['operator']
@@ -67,7 +66,7 @@ def email_web():
 @main.route('/api/email_web/query', methods=['GET'])
 @login_required
 def query_email_web():
-    rep = {"code": 0, "msg": "success", "count": 1000, "count": []}
+    rep = {"code": 0, "msg": "success", "count": 1000, "data": []}
     data = []
     domain = EmailDomain.query.all()
     for i in domain:
@@ -78,14 +77,15 @@ def query_email_web():
             'web': i.web,
             'username': i.username,
             'password': i.password,
-            'created': i.created
+            'created': i.created_time
         }
         data.append(x)
     rep['data'] = data
-    return jsonify(rep)  # 邮箱运营商管理帐号密码,删除接口
+    return jsonify(rep)
 
 
-@main.route('/api/email_web/delete', methods=['GET', 'POST'])
+# 邮箱运营商管理帐号密码,删除接口
+@main.route('/api/email_web/delete', methods=['POST'])
 @login_required
 def delete_email_web():
     if request.method == 'POST':
@@ -224,15 +224,19 @@ def queryemail():
 @login_required
 def add_email():
     if request.method == "POST":
+        # 获取邮箱分类
         email_server = request.form['select_email']
         id = request.form['id']
-        print(id)
         server = Emailserver.query.filter_by(name=email_server).first()
         # 新增
         if id == '0' and server is not None:
-            email = Email(email=request.form['email'], password=request.form['password'],
-                          description=request.form['description'])
+            email = Email(email=request.form['email'],
+                          password=request.form['password'],
+                          description=request.form['description']
+                          )
+            # 关联邮箱分类
             email.emailserver_id = server.id
+
             db.session.add(email)
             db.session.commit()
             return jsonify({"status": "success"})

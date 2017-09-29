@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,current_user
-from flask_principal import Principal, Permission, RoleNeed, identity_loaded,UserNeed#,IdentityContext # 权限认证
+from flask_principal import Principal, Permission, RoleNeed, identity_loaded,UserNeed
+#,IdentityContext # 权限认证
 
 # 初始化对象
 db = SQLAlchemy()
@@ -13,16 +14,6 @@ login_manager.login_message = "请登录后再进行访问该页面！"
 principals = Principal()
 admin_permission = Permission(RoleNeed('admin'))
 
-# context= IdentityContext(admin_permission)
-
-
-# security = Security()
-#
-#
-# def user_datastore():
-#     from .models import User, Role
-#     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
-#     return user_datastore
 
 # 工厂化
 def create_app():
@@ -47,7 +38,6 @@ def create_app():
             for role in current_user.roles:
                 identity.provides.add(RoleNeed(role.name))
 
-    # security.init_app(app,datastore=user_datastore)
 
     # 注册蓝图
     from .main import main as main_blueprint

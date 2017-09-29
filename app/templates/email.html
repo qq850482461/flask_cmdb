@@ -301,10 +301,11 @@
 
         //提交按钮
         $('#save').on('click', function () {
+            //表单验证
             var bootstrapValidator = $('#test2').data('bootstrapValidator');
             bootstrapValidator.validate();
 
-            //表单数据增加id，后端可以根据ID进行判断
+            //表单数据增加id，后端可以根据ID进行判断是新增还是修改
             function data() {
                 var values = $('#test2').serialize()
                 var selected = table.row('.selected').data()
@@ -352,7 +353,9 @@
                 layer.msg("请先选择一行");
             }
             else {
+                //清空表单
                 clear()
+                //同步select
                 select_sync()
                 //进行edit更新赋值
                 $("#modal-title").text("修改" + selected.email);

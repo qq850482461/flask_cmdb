@@ -31,6 +31,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer(), primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(255))
+    created_time = db.Column(db.DateTime, default=datetime.utcnow)
     # 多对多关联
     roles = db.relationship('Role', secondary='role_user', backref=db.backref('users', lazy='dynamic'))
 
@@ -79,13 +80,14 @@ class Email(db.Model):
     email = db.Column(db.String(80))
     password = db.Column(db.String(80))
     description = db.Column(db.String(80))
-    created = db.Column(db.DateTime, default=datetime.utcnow)
+    created_time = db.Column(db.DateTime, default=datetime.utcnow)
     emailserver_id = db.Column(db.Integer, db.ForeignKey('emailserver.id'))
 
     def __repr__(self):
         return "<Email_id:{0}>".format(self.id)
 
-# 邮箱存放表
+
+# 邮箱运营商存放表
 class EmailDomain(db.Model):
     __tablename__ = 'emaildomain'
     id = db.Column(db.Integer(), primary_key=True)
@@ -94,7 +96,33 @@ class EmailDomain(db.Model):
     operator = db.Column(db.String(80))
     username = db.Column(db.String(80))
     password = db.Column(db.String(80))
-    created = db.Column(db.DateTime, default=datetime.utcnow)
+    created_time = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return "<emaildomain_id:{0}>".format(self.id)
+
+
+# IP分类,一对多
+class Ip_Category(db.Model):
+    __tablename__ = 'ip_category'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80))
+    created_time = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_address = db.relationship('Ip_Addres', backref='ip_categorys', lazy='dynamic')
+
+    def __repr__(self):
+        return "<ip_class:{0}>".format(self.id)
+
+# IP地址
+class Ip_Addres(db.Model):
+    __tablename__ = 'ip_addres'
+    id = db.Column(db.Integer(), primary_key=True)
+    ip = db.Column(db.String(80))
+    mac = db.Column(db.String(80))
+    hostname = db.Column(db.String(80))
+    enable = db.Column(db.Boolean(), default=True)
+    created_time = db.Column(db.DateTime, default=datetime.utcnow)
+    ip_category = db.Column(db.Integer, db.ForeignKey('ip_category.id'))
+
+    def __repr__(self):
+        return "<ip_addres:{0}>".format(self.id)

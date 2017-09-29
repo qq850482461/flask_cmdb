@@ -19,20 +19,21 @@
                 <div class="box-header">
                     <div class="row">
                         <div class="col-md-6">
-                            <select id='select_sever' class="select2" style="width: 25%;">
-                                <option>1</option>
-                                <option>2</option>
+                            <select id='select' class="select2" style="width: 25%;">
+                                {% for i in ip %}
+                                    <option>{{ i.name }}</option>
+                                {% endfor %}
                             </select>
                             <div class="layui-inline">
-                                <input class="layui-input" name="id" id="demoReload">
+                                <input class="layui-input" id="search_value">
                             </div>
-                            <button class="layui-btn" data-type="reload">搜索</button>
+                            <button class="layui-btn" id="reload">搜索</button>
                         </div>
                         <div class="col-md-6" style="text-align:right">
                             <button id="add_ip_address" class="btn btn-success">增加IP地址</button>
-                            <button id="#" class="btn btn-success">批量可用</button>
+                            <button id="enabled" class="btn btn-success">批量可用</button>
                             <button id="#" class="btn btn-success">批量不可用</button>
-                            <button id="#" class="btn btn-danger">批量删除</button>
+                            <button id="delete" class="btn btn-danger"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
                         </div>
                     </div>
                 </div>
@@ -52,13 +53,21 @@
                             </div>
                         </div>
                         <div class="modal-body">
-                            <form id="add_user" class="form-horizontal">
+                            <form id="add_ip" class="form-horizontal">
                                 <div class="form-group">
                                     <label class="col-sm-3 control-label">
                                         <span>IP地址:</span>
                                     </label>
                                     <div class="col-sm-8">
-                                        <input type="text" class="form-control" data-inputmask="'alias': 'ip'" data-mask>
+                                        <input id="ip_address" name="ip_address" type="text" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <span>子网掩码:</span>
+                                    </label>
+                                    <div class="col-sm-8">
+                                        <input name="subnet_mask" type="text" class="form-control">
                                     </div>
                                 </div>
 
@@ -82,21 +91,63 @@
     {{ super() }}
     <script type="text/html" id="moban">
         {% raw %}
-        {{#  if(d.usable === 'True'){ }}
+        {{#  if(d.enable == 0){ }}
         <span class="label label-success">可用</span>
         {{#  } else { }}
         <span class="label label-danger">不可用</span>
         {{#  } }}
         {% endraw %}
     </script>
+    <!-- 验证样式validator的js -->
+    <script src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
     <!-- layui的js -->
     <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
     <!-- select2的js -->
     <script src="{{ url_for('static',filename='bower_components/select2/dist/js/select2.full.min.js') }}"></script>
-    <!-- IP格式的js -->
-    <script src="{{ url_for('static',filename='plugins/input-mask/jquery.inputmask.js') }}"></script>
-
     <script>
+
+        //验证表单
+        $(function () {
+            $("#add_ip").bootstrapValidator({
+                message: '这个值是无效的',
+                feedbackIcons: {
+                    /*input状态样式图片*/
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    ip_address: {
+                        message: 'IP验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '地址不能为空'
+                            },
+                            ip: {
+                                message: 'IP地址不合法'
+                            }
+                        }
+                    },
+                    subnet_mask: {
+                        message: '子网掩码验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '地址不能为空'
+                            },
+                            ip: {
+                                message: 'IP地址不合法'
+                            }
+                        }
+                    },
+                }
+            });
+        });
+
+        //重置模态框
+        function clearModal() {
+            $('#add_ip').data('bootstrapValidator').resetForm(true);
+            document.getElementById("add_ip").reset();
+        }
 
         //验证是否为IP
         function isValidIP(ip) {
@@ -104,12 +155,14 @@
             return reg.test(ip);
         }
 
-
         //初始化select2选项卡
         var select2 = $('.select2').select2({
             placeholder: '请选择类别',
             //allowClear: true
         })
+
+        //select的内容
+        var ip_select = $("#select").val();
 
         //初始化表单
         var table = layui.table;
@@ -120,22 +173,34 @@
             skin: 'row', //列边框风格
             even: true, //开启隔行背景
             page: true, //开启分页
-            limit: 90,
-            data: [{'id': 1, 'ip': '192.168.1.2', usable: 'True', hostname: '服务器A'}, {
-                'id': 2,
-                'ip': '192.168.1.3',
-                usable: 'False',
-                hostname: '服务器B'
-            }],
+            limit: 10,
+            limits: [10, 25, 50, 100],
+            url: '{{ url_for('property.query_ip') }}',
+            where: {select: ip_select,},
+            //data: [{'id': 1, 'ip': '192.168.1.2', usable: 'True', hostname: '服务器A'}],
             //标题栏
             cols: [[
                 {checkbox: true},
                 {field: 'id', title: 'ID', width: 150},
                 {field: 'ip', title: 'IP地址', sort: true, edit: 'text', width: 200},
-                {field: 'usable', title: '是否已用', sort: true, width: 200, templet: '#moban'},
-                {field: 'hostname', title: '主机名', width: 300},
+                {field: 'mac', title: 'MAC地址', sort: true, edit: 'text', width: 200},
+                {field: 'hostname', title: '主机名', edit: 'text', width: 300},
+                {field: 'enable', title: '是否已用', sort: true, width: 200, templet: '#moban'},
             ]],
         });
+
+        //IP地址池分类
+        $('#select').change(function () {
+            var checkValue = $("#select").val();
+            //console.log(checkValue)
+            table.reload('lzh', {
+                    where: {
+                        select: checkValue,
+                    }
+                }
+            )
+        });
+
 
         //监听单元格编辑
         table.on('edit(test)', function (obj) {
@@ -147,18 +212,134 @@
                 layer.msg('[ID: ' + data.id + '] ' + field + ' 字段更改为：' + value);
             }
             else {
+                table.reload('lzh');
                 layer.msg("你输入的IP地址不合法,无法提交")
             }
-
         });
 
-        $('[data-mask]').inputmask()
+        //可用按钮
+        $('#enabled').on('click', function () {
+            var checkStatus = table.checkStatus('lzh')
+                , data = checkStatus.data;
+            if (data.length == 0) {
+                layer.msg("你需要选一点什么!")
+            }
+            else {
+                layer.alert(JSON.stringify(data));
+            }
+        });
+
+        //搜索按钮
+        $('#reload').on('click', function () {
+            var search_value = $('#search_value')
+            var checkValue = $("#select").val();
+            //正则表达式判断是否唯为空
+            var parten = /^\s*$/;
+            if (parten.test(search_value.val())) {
+                table.reload('lzh',{
+                    where:{
+                        select: checkValue
+                    }
+                })
+                layer.msg("输入为空,重载表格")
+            }
+            else {
+                table.reload('lzh', {
+                        where: {
+                            select: checkValue,
+                            search: search_value.val()
+                        }
+                    }
+                )
+            }
+        })
+
+        //删除按钮
+        $('#delete').on('click', function () {
+            var checkStatus = table.checkStatus('lzh')
+            var data = checkStatus.data;
+
+            if (data.length == 0) {
+                layer.msg("你需要选一点什么!")
+            }
+            else {
+                layer.confirm('是否确定删除选中的内容?', {
+                    btn: ['删除', '取消'] //方法按顺序回调
+                    ,
+                }, function () {
+                    var lists = new Array()
+                    for (var i = 0; i < data.length; i++) {
+                        lists.push(data[i].id)
+                    }
+                    console.log(lists)
+                    //layer.alert(JSON.stringify(data));
+                    $.ajax({
+                        url: "{{ url_for('property.delete') }}",
+                        type: "POST",
+                        traditional: true, //取消深度序列化
+                        data: {"id": lists},
+                        success: function (rep) {
+                            if (rep.status == 'success') {
+                                layer.msg("提交成功");
+                                table.reload('lzh');
+                            }
+                            else {
+                                alert("后端返回错误！")
+                            }
+                        },
+                        error: function () {
+                            alert("出错！前端出错")
+                        }
+                    });
+
+                }, function () {
+                });
+            }
+        });
 
         //增加IP按钮
         $('#add_ip_address').on('click', function () {
-            console.log("test")
+            clearModal()
             $("#myModal").modal("show");
         });
+
+        //提交按钮
+        $('#save').on('click', function () {
+            //表单验证
+            var bootstrapValidator = $('#add_ip').data('bootstrapValidator');
+            bootstrapValidator.validate();
+            // 拼接data内容增加,select的选项发送给ajax
+            function data() {
+                var data = $('#add_ip').serialize() + '&select=' + $("#select").val();
+                return data
+            }
+
+            if (bootstrapValidator.isValid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('property.add_ip') }}",
+                    data: data(),
+                    success: function (res) {
+                        if (res.status == 'success') {
+                            $('#myModal').modal('hide')
+                            layer.msg("提交成功");
+                            table.reload('lzh');
+                        }
+                        else {
+                            alert("后端返回错误！" +
+                                "无法提交到后台")
+                        }
+                    },
+                    error: function () {
+                        alert("前端出错,无法提交请求到后端")
+                    }
+                });
+            }
+            else {
+                layer.msg("表单验证失败！");
+            }
+        });
+
 
     </script>
 
