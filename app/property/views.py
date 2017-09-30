@@ -14,6 +14,43 @@ def ip():
     return render_template('ip_address.html', ip=ip_category)
 
 
+# ip地址修改
+@property.route('/api/ip_address/edit', methods=['POST'])
+@login_required
+def edit():
+    id = request.values.get('id')
+    field = request.values.get('field')
+    value = request.values.get('value')
+    ip_address = Ip_Addres.query.filter_by(id=int(id))
+    if ip_address is not None:
+        ip_address.update({
+            field: value
+        })
+        db.session.commit()
+        return jsonify({"status": "success"})
+    else:
+        return jsonify({"status": "failed"})
+
+
+# ip地址批量可用
+@property.route('/api/ip_address/enable', methods=['POST'])
+@login_required
+def enable():
+    id_list = request.form.getlist('id')
+    if id_list is not None:
+        for i in id_list:
+            ip_addres = Ip_Addres.query.get(int(i))
+            if ip_addres.enable is True:
+                ip_addres.enable = False
+                db.session.add(ip_addres)
+                db.session.commit()
+            else:
+                ip_addres.enable = True
+                db.session.add(ip_addres)
+                db.session.commit()
+        return jsonify({"status": "success"})
+
+
 # ip地址池删除接口
 @property.route('/api/ip_address/delete', methods=['POST'])
 @login_required
@@ -62,7 +99,7 @@ def query_ip():
     limit = request.args['limit']
     select = request.args['select']
     search = request.values.get('search')
-    print(search)
+
     rep = {
         "code": 0,
         "msg": "success",

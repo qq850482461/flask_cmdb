@@ -15,6 +15,11 @@
             </h1>
         </section>
         <section class="content">
+            <div class="alert alert-info alert-dismissible">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <h4><i class="icon fa fa-info"></i> 操作提示</h4>
+                 1:表格行内进行编辑修改 2:'搜索'按钮没有内容就'重载'表格 3:增加IP会自动根据掩码计算增加
+            </div>
             <div class="box">
                 <div class="box-header">
                     <div class="row">
@@ -31,8 +36,7 @@
                         </div>
                         <div class="col-md-6" style="text-align:right">
                             <button id="add_ip_address" class="btn btn-success">增加IP地址</button>
-                            <button id="enabled" class="btn btn-success">批量可用</button>
-                            <button id="#" class="btn btn-success">批量不可用</button>
+                            <button id="enabled" class="btn btn-success">可用/不可用</button>
                             <button id="delete" class="btn btn-danger"><i class="fa fa-trash-o"></i>&nbsp;删除</button>
                         </div>
                     </div>
@@ -173,7 +177,7 @@
             skin: 'row', //列边框风格
             even: true, //开启隔行背景
             page: true, //开启分页
-            limit: 10,
+            limit: 25,
             limits: [10, 25, 50, 100],
             url: '{{ url_for('property.query_ip') }}',
             where: {select: ip_select,},
@@ -206,15 +210,31 @@
         table.on('edit(test)', function (obj) {
             var value = obj.value //得到修改后的值
                 , data = obj.data //得到所在行所有键值
-                , field = obj.field; //得到字段
-            console.log(value)
-            if (isValidIP(value) == true) {
-                layer.msg('[ID: ' + data.id + '] ' + field + ' 字段更改为：' + value);
+                , field = obj.field; //得到修改字段
+            // 获取修改的值
+            function test() {
+                var req = {id: data.id, field: field, value: value}
+                return req
             }
-            else {
-                table.reload('lzh');
-                layer.msg("你输入的IP地址不合法,无法提交")
-            }
+
+            $.ajax({
+                url: "{{ url_for('property.edit') }}",
+                type: "POST",
+                data: test(),
+                success: function (rep) {
+                    if (rep.status == 'success') {
+                        layer.msg("修改成功");
+                        table.reload('lzh');
+                    }
+                    else {
+                        alert("后端返回错误！")
+                    }
+                },
+                error: function () {
+                    alert("出错！前端出错")
+                }
+            });
+            //layer.msg('[ID: ' + data.id + '] ' + field + ' 字段更改为：' + value);
         });
 
         //可用按钮
@@ -225,7 +245,30 @@
                 layer.msg("你需要选一点什么!")
             }
             else {
-                layer.alert(JSON.stringify(data));
+                var lists = new Array()
+                for (var i = 0; i < data.length; i++) {
+                    lists.push(data[i].id)
+                }
+                //console.log(lists)
+                //layer.alert(JSON.stringify(data));
+                $.ajax({
+                    url: "{{ url_for('property.enable') }}",
+                    type: "POST",
+                    traditional: true, //取消深度序列化
+                    data: {"id": lists},
+                    success: function (rep) {
+                        if (rep.status == 'success') {
+                            layer.msg("提交成功");
+                            table.reload('lzh');
+                        }
+                        else {
+                            alert("后端返回错误！")
+                        }
+                    },
+                    error: function () {
+                        alert("出错！前端出错")
+                    }
+                });
             }
         });
 
@@ -236,8 +279,8 @@
             //正则表达式判断是否唯为空
             var parten = /^\s*$/;
             if (parten.test(search_value.val())) {
-                table.reload('lzh',{
-                    where:{
+                table.reload('lzh', {
+                    where: {
                         select: checkValue
                     }
                 })
