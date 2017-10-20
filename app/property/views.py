@@ -1,9 +1,16 @@
 from . import property
 from flask import render_template, jsonify, request
-from .. import db, admin_permission
+from .. import db
 from ..models import Ip_Addres, Ip_Category
 from flask_login import login_required
 from IPy import IP
+
+
+# 登记管理
+@property.route('/record', methods=['GET', 'POST'])
+@login_required
+def record():
+    return render_template('record.html')
 
 
 # ip地址池分配管理
@@ -79,8 +86,9 @@ def add_ip():
     if ip_address and ip_address is not None:
         try:
             ip = IP(ip_address).make_net(subnet_mask)
-        except:
+        except Exception as e:
             return jsonify({"status": "failed"})
+            print(e)
         else:
             # 获取到IP网络段转换为Str写入数据库
             for i in ip:

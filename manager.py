@@ -6,7 +6,6 @@ from flask_migrate import Migrate, MigrateCommand  # flask 迁移数据
 app = create_app()
 migrate = Migrate(app, db)
 manager = Manager(app)
-# Migration commands
 manager.add_command('db', MigrateCommand)
 
 
@@ -17,5 +16,5 @@ def create_db():
 
 
 if __name__ == '__main__':
-    app.run()
-    # manager.run()
+    #app.run()
+    manager.run()

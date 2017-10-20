@@ -202,7 +202,7 @@ def queryemail():
             data = []
             # 转换json对象
             for i in list(email_server[value]):
-                y = i.email_server
+                y = i.email_servers
                 x = {
                     "id": i.id,
                     "email": i.email,

@@ -2,7 +2,6 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager,current_user
 from flask_principal import Principal, Permission, RoleNeed, identity_loaded,UserNeed
-#,IdentityContext # 权限认证
 
 # 初始化对象
 db = SQLAlchemy()
@@ -12,7 +11,7 @@ login_manager.login_view = 'auth.login'  # 制定系统默认的登录页面
 login_manager.login_message = "请登录后再进行访问该页面！"
 
 principals = Principal()
-admin_permission = Permission(RoleNeed('admin'))
+admin_permission = Permission(RoleNeed('admin'),RoleNeed('skt'))
 
 
 # 工厂化
