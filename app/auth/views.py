@@ -1,6 +1,6 @@
 from . import auth
 from .. import db, admin_permission
-from ..models import User, Role
+from ..models import User, Role, Node
 from flask import redirect, render_template, request, url_for, flash, jsonify
 from flask_login import login_user, logout_user, current_user, login_required
 from flask_principal import Identity, AnonymousIdentity, identity_changed, current_app, IdentityContext
@@ -11,6 +11,7 @@ from flask_principal import Identity, AnonymousIdentity, identity_changed, curre
 def context():
     admin = IdentityContext(admin_permission)
     return dict(admin=admin)
+
 
 # 登录
 @auth.route('/login', methods=['GET', 'POST'])
@@ -68,10 +69,93 @@ def resetpw():
     return render_template('resetpassword.html')
 
 
+# 菜单管理
+@auth.route('/menu', methods=['GET', 'POST'])
+@login_required
+def menu():
+    return render_template('menu.html')
+
+
+# 菜单管理API查询接口
+@auth.route('/api/menu/query', methods=['GET'])
+@login_required
+def query_node():
+    p_lists = Node.query.filter_by(parent_id=0).order_by(Node.order).all()
+    c_list = Node.query.filter(Node.parent_id != 0).order_by(Node.order).all()
+    req = []
+    for i in (p_lists + c_list):
+        y = {
+            "id": i.id,
+            "pId": i.parent_id,
+            "name": i.label,
+            "url": i.url,
+            "order": i.order,
+            "ico": i.icon
+        }
+        if i.parent_id == 0:
+            y["childOuter"] = False
+            y["open"] = True
+        req.append(y)
+
+    return jsonify(req)
+
+
+# 删除接口
+@auth.route('/api/menu/delete', methods=['POST'])
+def menu_delete():
+    id = request.values.get('id')
+    res = {'message': "succeed"}
+    if id is not None:
+        node = Node.query.get(int(id))
+        try:
+            db.session.delete(node)
+            db.session.commit()
+            return jsonify(res)
+        except Exception as e:
+            res['message'] = e.__repr__()
+            return jsonify(res)
+
+
+# 菜单管理修改_新增接口
+@auth.route('/api/menu/add', methods=['POST'])
+def menu_add():
+    id = int(request.values.get('id'))
+    node = Node.query.get(int(id))
+    res = {'status': 200, 'message': "succeed"}
+    # 修改内容
+    if id != 0 and node is not None:
+        node.parent_id = request.values.get('pId')
+        node.url = request.values.get('url')
+        node.label = request.values.get('label')
+        node.order = request.form['order']
+        node.icon = request.values.get('ico')
+        try:
+            db.session.commit()
+            return jsonify(res)
+        except Exception as e:
+            db.session.rollback()
+            res['message'] = e.__repr__()
+            return jsonify(res)
+    # 新增
+    elif id == 0:
+        order = request.form['order']
+        node = Node(order=order, label="新节点", parent_id=0)
+        try:
+            db.session.add(node)
+            db.session.commit()
+            return jsonify(res)
+        except Exception as e:
+            db.session.rollback()
+            res['message'] = e.__repr__()
+            return jsonify(res)
+    else:
+        res['message'] = 'failed'
+        return jsonify(res)
+
+
 # 增加用户
 @auth.route('/adduser', methods=['GET', 'POST'])
 @login_required
-@admin_permission.require(http_exception=403)
 def adduser():
     all_users = User.query.order_by(User.id.desc())
     all_roles = Role.query.all()
@@ -100,7 +184,6 @@ def adduser():
                 # 返回json到前端
                 return jsonify(res)
             else:
-                print("更新操作执行")
                 user.username = username
                 user.password = password
                 user.roles = roles
@@ -114,7 +197,6 @@ def adduser():
 # 查询api接口
 @auth.route('/api/edit_user', methods=['POST'])
 @login_required
-@admin_permission.require(http_exception=403)
 def edit_user():
     if request.method == 'POST':
         id = request.form['id']

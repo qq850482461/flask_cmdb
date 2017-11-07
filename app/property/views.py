@@ -87,8 +87,8 @@ def add_ip():
         try:
             ip = IP(ip_address).make_net(subnet_mask)
         except Exception as e:
-            return jsonify({"status": "failed"})
             print(e)
+            return jsonify({"status": "failed", 'message': e.__repr__()})
         else:
             # 获取到IP网络段转换为Str写入数据库
             for i in ip:

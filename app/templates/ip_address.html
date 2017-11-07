@@ -370,8 +370,7 @@
                             table.reload('lzh');
                         }
                         else {
-                            alert("后端返回错误！" +
-                                "无法提交到后台")
+                            layer.alert('后端抛出异常:'+res.message);
                         }
                     },
                     error: function () {

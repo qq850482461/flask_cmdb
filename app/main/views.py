@@ -1,7 +1,7 @@
 from . import main
-from flask import render_template, redirect, jsonify, request
-from flask_login import login_required
-from .. import db, admin_permission
+from flask import render_template, redirect, jsonify, request, abort
+from flask_login import login_required, current_user
+from .. import db, admin_permission, permission
 from ..models import Email, Emailserver, EmailDomain
 from datetime import datetime
 
@@ -27,7 +27,6 @@ def index():
 # 邮箱运营商web页面,增加修改运营商页面
 @main.route('/email_web', methods=['GET', 'POST'])
 @login_required
-@admin_permission.require(http_exception=403)
 def email_web():
     if request.method == "POST":
 
@@ -103,7 +102,6 @@ def delete_email_web():
 # 邮箱服务器管理页面
 @main.route('/email_edit', methods=['GET', 'POST'])
 @login_required
-@admin_permission.require(http_exception=403)
 def email_edit():
     return render_template('email_server.html')
 

@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <!-- ztree皮肤 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='zTree_v3/css/metroStyle/metroStyle.css') }}">
+    <!-- layui样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">
+    <!-- 验证样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
+{% endblock %}
+
+{% block title %}菜单管理{% endblock title %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                菜单管理
+                <small>菜单管理</small>
+            </h1>
+        </section>
+        <section class="content">
+            <div class="box">
+                <div class="box-header with-border">
+                    <button id="add" type="button" class="btn btn-primary  btn-xs">添加节点</button>
+                </div>
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-lg-2 ">
+                            <ul id="lzh" class="ztree"></ul>
+                        </div>
+                        <div class="col-lg-7 col-lg-offset-3">
+                            <form id="update" class="form-horizontal">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">
+                                                <span>ID</span>
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input class="form-control" name="id" readonly="readonly">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">
+                                                <span>父ID</span>
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input class="form-control" name="pId" disabled="disabled">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">
+                                                <span>URL</span>
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input class="form-control" name="url" disabled="disabled">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">
+                                                <span>菜单名称</span>
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input class="form-control" name="label" disabled="disabled">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">
+                                                <span>排序</span>
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input class="form-control" name="order" disabled="disabled">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="col-sm-3 control-label">
+                                                <span>图标样式</span>
+                                            </label>
+                                            <div class="col-sm-8">
+                                                <input class="form-control" name="ico" disabled="disabled">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-md-offset-6">
+                                        <div class="form-group">
+                                            <div style="margin-left:78%;">
+                                                <button id="save" type="submit" class="btn btn-primary"
+                                                        disabled="disabled">
+                                                    保存
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.core.js') }}"></script>
+    <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.excheck.js') }}"></script>
+    <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.exedit.js') }}"></script>
+    <!-- layui的js -->
+    <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
+    <!-- 验证样式validator的js -->
+    <script src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
+    <script>
+        $(function () {
+            $("#update").bootstrapValidator({
+                message: '这个值是无效的',
+                feedbackIcons: {
+                    /*input状态样式图片*/
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    order: {
+                        message: 'order验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: 'order地址不能为空'
+                            },
+                            regexp: {
+                                regexp: /^\+?(0|[1-9][0-9]*)$/,
+                                message: '请输入一个正整数'
+                            }
+                        }
+                    },
+                    pId: {
+                        message: 'pId验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: 'pId地址不能为空'
+                            },
+                            regexp: {
+                                regexp: /^\+?(0|[1-9][0-9]*)$/,
+                                message: '请输入一个正整数'
+                            }
+                        }
+                    },
+                }
+            });
+        });
+
+        var zTreeObj;
+        // zTree 的参数配置
+        var setting = {
+            async: {
+                enable: true,//采用异步加载
+                type: "get",
+                autoParam: ["id"],//自动提交父ID
+                url: "{{ url_for('auth.query_node') }}",
+                dataType: "json"
+            },
+            callback: {
+                beforeDrag: beforeDrag, //拽动回调
+                beforeRemove: beforeRemove, //删除前询问回调
+                onMouseDown: onMouseDown
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pId",
+                    rootPId: 0
+                }
+            },
+            edit: {
+                drag: {
+                    autoExpandTrigger: true,
+                    isCopy: false,
+                    isMove: true,
+                    prev: dropPrev,//是否允许移动到前面
+                    next: dropNext,//是否允许移动到后面
+                    inner: false,//是否允许成为目标子节点
+                },
+                enable: true,
+                showRenameBtn: false,//重命名按钮
+                showRemoveBtn: true//移动按钮
+            }
+        };
+
+        //删除disabled
+        function rm_disable() {
+            $("input[name='url']").attr("disabled", false);
+            $("input[name='pId']").attr("disabled", false);
+            $("input[name='label']").attr("disabled", false);
+            $("input[name='order']").attr("disabled", false);
+            $("input[name='ico']").attr("disabled", false);
+            $("#save").attr("disabled", false);
+        }
+
+        //赋值
+        function assignValue(treeNode) {
+            $("input[name='id']").val(treeNode.id)
+            $("input[name='url']").val(treeNode.url)
+            $("input[name='pId']").val(treeNode.pId)
+            $("input[name='order']").val(treeNode.order)
+            $("input[name='ico']").val(treeNode.ico)
+            $("input[name='label']").val(treeNode.name)
+        }
+
+        //鼠标点击后回调函数
+        function onMouseDown(event, treeId, treeNode) {
+            if (treeNode !== null) {
+                rm_disable()
+                assignValue(treeNode)
+            }
+        }
+
+        //是否允许移动到前面回调函数
+        function dropPrev(treeId, nodes, targetNode) {
+            var pNode = targetNode.getParentNode();
+            //console.log("移动的" + nodes[0].pId)
+            //console.log("目标的" + targetNode.pId)
+            if (nodes[0].pId !== targetNode.pId) {
+                //console.log("执行了")
+                return false;
+            }
+            else {
+                for (var i = 0, l = curDragNodes.length; i < l; i++) {
+                    var curPNode = curDragNodes[i].getParentNode();
+                    if (curPNode && curPNode !== targetNode.getParentNode() && curPNode.childOuter === false) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        //是否允许移动到后面回调函数
+        function dropNext(treeId, nodes, targetNode) {
+            var pNode = targetNode.getParentNode();
+            if (nodes[0].pId !== targetNode.pId) {
+                //console.log("执行了2")
+                return false;
+            }
+            else {
+                for (var i = 0, l = curDragNodes.length; i < l; i++) {
+                    var curPNode = curDragNodes[i].getParentNode();
+                    if (curPNode && curPNode !== targetNode.getParentNode() && curPNode.childOuter === false) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        //删除确认回调函数
+        function beforeRemove(treeId, treeNode) {
+            var zTree = $.fn.zTree.getZTreeObj("lzh");
+            zTree.selectNode(treeNode);
+            //判断是否为父节点
+            if (treeNode.pId == 0) {
+                //判断父节点下是否有子节点
+                if (treeNode.check_Child_State == 0) {
+                    alert("还存在子节点不能删除!")
+                    return false;
+                }
+                else {
+                    var flag = confirm("确认删除节点 -- " + treeNode.name + " 吗？")
+                    if (flag) {
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ url_for('auth.menu_delete') }}",
+                            data: {"id": treeNode.id},
+                            success: function (res) {
+                                if (res.message == 'succeed') {
+                                    // 刷新ztree
+                                    var tree = $.fn.zTree.getZTreeObj("lzh");
+                                    tree.reAsyncChildNodes(null, "refresh");
+                                    layer.msg("提交成功");
+                                    return true;
+                                }
+                                else {
+                                    alert('后端抛出异常:' + res.message);
+                                    return false;
+                                }
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                return false;
+                                alert("前端出错,无法提交请求到后端" + errorThrown)
+                            }
+                        });
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+            else {
+                var flag = confirm("确认删除 子节点 -- " + treeNode.name + " 吗？")
+                if (flag) {
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('auth.menu_delete') }}",
+                        data: {"id": treeNode.id},
+                        success: function (res) {
+                            if (res.message == 'succeed') {
+                                // 刷新ztree
+                                var tree = $.fn.zTree.getZTreeObj("lzh");
+                                tree.reAsyncChildNodes(null, "refresh");
+                                layer.msg("提交成功");
+                                return true;
+                            }
+                            else {
+                                alert('后端抛出异常:' + res.message);
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert("前端出错,无法提交请求到后端" + errorThrown)
+                        }
+                    });
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+
+        //拽动回调函数
+        var log, className = "dark", curDragNodes, autoExpandNode;
+        function beforeDrag(treeId, treeNodes) {
+            for (var i = 0, l = treeNodes.length; i < l; i++) {
+                if (treeNodes[i].drag === false) {
+                    curDragNodes = null;
+                    return false;
+                } else if (treeNodes[i].parentTId && treeNodes[i].getParentNode().childDrag === false) {
+                    curDragNodes = null;
+                    return false;
+                }
+            }
+            curDragNodes = treeNodes;
+            return true;
+        }
+
+        zTreeObj = $.fn.zTree.init($("#lzh"), setting);
+
+        function check() {
+            var order = $("input[name='order']").val();
+            var pId = $("input[name='pId']").val();
+            if (order.length == 0) {
+
+            }
+        };
+
+        //增加IP按钮
+        $('#save').on('click', function () {
+            var data = $("#update").serialize();
+
+            var bootstrapValidator = $('#update').data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if (bootstrapValidator.isValid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('auth.menu_add') }}",
+                    dataType: "json",
+                    data: data,
+                    success: function (res) {
+                        if (res.message == 'succeed') {
+                            // 刷新ztree
+                            var tree = $.fn.zTree.getZTreeObj("lzh");
+                            tree.reAsyncChildNodes(null, "refresh");
+                            layer.msg("提交成功");
+                        }
+                        else {
+                            alert('后端抛出异常:' + res.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("前端出错,无法提交请求到后端" + errorThrown)
+                    }
+                });
+            } else {
+                layer.msg("表单验证没有通过");
+            }
+        });
+
+        // 添加子节点的按钮
+        $('#add').on('click', function () {
+            var tree = $.fn.zTree.getZTreeObj("lzh");
+            count = tree.getNodes().length + 1;
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('auth.menu_add') }}",
+                data: {"id": 0, "order": count},
+                success: function (res) {
+                    if (res.message == 'succeed') {
+                        // 刷新ztree
+                        var tree = $.fn.zTree.getZTreeObj("lzh");
+                        tree.reAsyncChildNodes(null, "refresh");
+                        layer.msg("提交成功");
+                    }
+                    else {
+                        alert('后端抛出异常:' + res.message);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("前端出错,无法提交请求到后端" + errorThrown)
+                }
+            });
+        });
+    </script>
+{% endblock %}
