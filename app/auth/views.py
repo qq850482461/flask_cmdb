@@ -102,6 +102,7 @@ def query_node():
 
 # 删除接口
 @auth.route('/api/menu/delete', methods=['POST'])
+@login_required
 def menu_delete():
     id = request.values.get('id')
     res = {'message': "succeed"}
@@ -118,6 +119,7 @@ def menu_delete():
 
 # 菜单管理修改_新增接口
 @auth.route('/api/menu/add', methods=['POST'])
+@login_required
 def menu_add():
     id = int(request.values.get('id'))
     node = Node.query.get(int(id))
@@ -150,6 +152,27 @@ def menu_add():
             return jsonify(res)
     else:
         res['message'] = 'failed'
+        return jsonify(res)
+
+
+# 菜单排序
+@auth.route('/api/menu/order', methods=['POST'])
+@login_required
+def order():
+    data = request.get_json()
+    res = {'message': "succeed"}
+    if data is not None:
+        for i in data:
+            id = i["id"]
+            order = i["order"]
+            try:
+                node = Node.query.get(int(id))
+                node.order = int(order)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                res['message'] = e.__repr__()
+                return jsonify(res)
         return jsonify(res)
 
 
@@ -219,3 +242,9 @@ def edit_user():
             db.session.commit()
             res = {"message": 200}
             return jsonify(res)
+
+
+@auth.route('/roles', methods=['GET', 'POST'])
+@login_required
+def role():
+    return render_template('role.html')

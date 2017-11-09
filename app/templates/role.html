@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block styles %}
+    {{ super() }}
+    <!-- 验证样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
+{% endblock %}
+
+{% block title %}角色管理{% endblock title %}
+{% block content %}
+    <div class="content-wrapper">
+        <section class="content-header">
+            <h1>
+                角色管理
+                <small>角色管理</small>
+            </h1>
+        </section>
+        <section class="content">
+
+        </section>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <!-- 验证样式validator的js -->
+{% endblock scripts %}

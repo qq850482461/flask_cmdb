@@ -172,7 +172,9 @@
             callback: {
                 beforeDrag: beforeDrag, //拽动回调
                 beforeRemove: beforeRemove, //删除前询问回调
-                onMouseDown: onMouseDown
+                onMouseDown: onMouseDown, //鼠标点击
+                onDrop: onDrop, //拽动结束"后"的回调
+                beforeDrop: beforeDrop //拽东结束"前"回调
             },
             data: {
                 simpleData: {
@@ -196,6 +198,7 @@
                 showRemoveBtn: true//移动按钮
             }
         };
+
 
         //删除disabled
         function rm_disable() {
@@ -225,11 +228,83 @@
             }
         }
 
+        function beforeDrop(treeId, treeNodes) {
+            return confirm("确认调整菜单顺序吗？");
+        }
+
+        //拽动后回调函数
+        function onDrop(event, treeId, treeNodes, targetNode, moveType) {
+            var tree = $.fn.zTree.getZTreeObj("lzh");
+            if (targetNode == null) {
+                layer.msg("你只是拽了一下没有交换位置,触发回调函数");
+            }
+            else {
+                //判断是否为父节点拽动
+                if (treeNodes[0].pId == 0) {
+                    var P_nodes = tree.getNodes()
+                    var json_object = []
+                    //遍历修改oreder顺序
+                    $.each(P_nodes, function (i, value) {
+                        value.order = i + 1
+                        json_object.push({"id": value.id, "order": value.order})
+                    })
+                    var json = JSON.stringify(json_object);
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('auth.order') }}",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: json,
+                        success: function (res) {
+                            if (res.message == 'succeed') {
+                                tree.reAsyncChildNodes(null, "refresh");
+                                layer.msg("排序成功刷新ztree");
+                            }
+                            else {
+                                alert('后端抛出异常:' + res.message);
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert("前端出错,无法提交请求到后端" + errorThrown)
+                        }
+                    });
+                }
+                else {
+                    //子节点拖动
+                    var C_nodes = treeNodes[0].getParentNode().children
+                    var json_object = []
+                    //遍历修改oreder顺序
+                    $.each(C_nodes, function (i, value) {
+                        value.order = i + 1
+                        json_object.push({"id": value.id, "order": value.order})
+                    })
+                    var json = JSON.stringify(json_object);
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('auth.order') }}",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: json,
+                        success: function (res) {
+                            if (res.message == 'succeed') {
+                                tree.reAsyncChildNodes(null, "refresh");
+                                layer.msg("排序成功刷新ztree");
+                            }
+                            else {
+                                alert('后端抛出异常:' + res.message);
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert("前端出错,无法提交请求到后端" + errorThrown)
+                        }
+                    });
+                }
+            }
+        };
+
         //是否允许移动到前面回调函数
         function dropPrev(treeId, nodes, targetNode) {
             var pNode = targetNode.getParentNode();
-            //console.log("移动的" + nodes[0].pId)
-            //console.log("目标的" + targetNode.pId)
             if (nodes[0].pId !== targetNode.pId) {
                 //console.log("执行了")
                 return false;
@@ -242,13 +317,14 @@
                     }
                 }
             }
+            //console.log("移动的" + nodes[0].order)
+            //console.log("目标的排序" + targetNode.order)
             return true;
         }
         //是否允许移动到后面回调函数
         function dropNext(treeId, nodes, targetNode) {
             var pNode = targetNode.getParentNode();
             if (nodes[0].pId !== targetNode.pId) {
-                //console.log("执行了2")
                 return false;
             }
             else {
