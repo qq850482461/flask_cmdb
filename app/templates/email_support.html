@@ -170,7 +170,7 @@
         table.render({
             elem: '#demo', //指定原始表格元素选择器（推荐id选择器）
             id: 'lzh', //设定容器唯
-            url: '{{ url_for('main.query_email_web') }}',
+            url: '{{ url_for('main.query_email_support') }}',
             skin: 'row', //列边框风格
             even: true, //开启隔行背景
             //page: true, //开启分页
@@ -194,7 +194,7 @@
                 , data = obj.data //得到所在行所有键值
                 , field = obj.field; //得到字段
             $.ajax({
-                url: "{{ url_for('main.email_web') }}",
+                url: "{{ url_for('main.email_support') }}",
                 type: "POST",
                 data: data,//jquery支持object对象类型
                 success: function (rep) {
@@ -223,7 +223,7 @@
                 var data = $('#add_user').serialize()
                 console.log(data + "&id=0")
                 $.ajax({
-                    url: "{{ url_for('main.email_web') }}",
+                    url: "{{ url_for('main.email_support') }}",
                     type: "POST",
                     data: data + "&id=0",
                     success: function (rep) {
@@ -268,7 +268,7 @@
                     console.log(lists)
                     //layer.alert(JSON.stringify(data));
                     $.ajax({
-                        url: "{{ url_for('main.delete_email_web') }}",
+                        url: "{{ url_for('main.delete_email_support') }}",
                         type: "POST",
                         traditional: true, //取消深度序列化
                         data: {"id": lists},

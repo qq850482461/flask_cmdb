@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 {% block styles %}
     {{ super() }}
+    <!-- ztree皮肤 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='zTree_v3/css/metroStyle/metroStyle.css') }}">
     <!-- 验证样式 -->
     <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
+    <!-- layui样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">
 {% endblock %}
 
 {% block title %}角色管理{% endblock title %}
@@ -15,11 +19,103 @@
             </h1>
         </section>
         <section class="content">
-
+            <div class="box">
+                <div class="box-header with-border">
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-default">
+                        火箭发射
+                    </button>
+                </div>
+                <div class="box-body">
+                    <table id="demo" lay-filter="test"></table>
+                </div>
+            </div>
         </section>
     </div>
+    <div class="modal fade" id="modal-default">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">模态框</h4>
+                </div>
+                <div class="modal-body">
+                    <ul id="lzh" class="ztree"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
+                    <button type="button" class="btn btn-primary">很油</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-mini" lay-event="edit">授权</a>
+        <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">删除</a>
+    </script>
+
 {% endblock %}
 {% block scripts %}
     {{ super() }}
-    <!-- 验证样式validator的js -->
+    <!-- layui的js -->
+    <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
+    <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.all.js') }}"></script>
+    <script>
+        var table = layui.table;
+        //方法级渲染
+        table.render({
+            elem: '#demo', //指定原始表格元素选择器（推荐id选择器）
+            id: 'lzh', //设定容器唯
+            height: 400, //设定容器高度
+            skin: 'row', //列边框风格
+            even: true, //开启隔行背景
+            page: true, //开启分页
+            limit: 25,
+            limits: [10, 25, 50, 100],
+            data: [{'id': 1, 'user': 'lzh', 'text': '发财'},{'id': 2, 'user': 'NBHD', 'text': '喝汤'}],
+            //标题栏
+            cols: [[
+                {field: 'id', title: 'ID', width: 150},
+                {field: 'user', title: '用户', sort: true, width: 150},
+                {field: 'text', title: '备注', sort: true, width: 200},
+                {fixed: 'right', title: '操作', width: 150, align: 'center', toolbar: '#barDemo'}
+            ]],
+        });
+
+        //工具条回调函数
+        table.on('tool(test)', function (obj) {
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值
+            var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+            if (layEvent === 'edit') {
+                layer.msg('edit');
+            }
+            else if (layEvent === 'del') {
+                layer.alert('编辑行：<br>'+ JSON.stringify(data));
+            }
+
+        });
+
+        //以下是ztree的设定
+        var zTreeObj;
+        // zTree 的参数配置
+        var zNodes = [
+            {
+                name: "test1", open: true, children: [
+                {name: "test1_1"}, {name: "test1_2"}]
+            },
+            {
+                name: "test2", open: true, children: [
+                {name: "test2_1"}, {name: "test2_2"}]
+            }
+        ];
+        var setting = {
+            check: {
+                enable: true
+            }
+        };
+        zTreeObj = $.fn.zTree.init($("#lzh"), setting, zNodes);
+    </script>
 {% endblock scripts %}

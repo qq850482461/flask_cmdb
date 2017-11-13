@@ -203,7 +203,7 @@
             "deferRender": true,
             "ajax": {
                 type: 'Get',
-                url: "{{ url_for('main.email_server') }}"
+                url: "{{ url_for('main.query_server') }}"
             },
             "iDisplayLength": 25,
             "language": {
@@ -326,7 +326,7 @@
             if (bootstrapValidator.isValid()) {
                 $.ajax({
                     type: "POST",
-                    url: "{{ url_for('main.email_server') }}",
+                    url: "{{ url_for('main.query_server') }}",
                     data: data(),
                     success: function (res) {
                         if (res.status == 'success') {

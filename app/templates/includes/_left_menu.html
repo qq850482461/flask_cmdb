@@ -15,14 +15,12 @@
                 <ul class="treeview-menu">
                     <li><a href="{{ url_for('main.email') }}"><i class="fa fa-circle-o"></i> <span>查询邮箱</span></a>
                     </li>
-                    {% if admin.can() %}
-                        <li><a href="{{ url_for('main.email_edit') }}"><i class="fa fa-circle-o"></i>
-                            <span>邮箱管理</span></a>
-                        </li>
-                        <li><a href="{{ url_for('main.email_web') }}"><i class="fa fa-circle-o"></i>
-                            <span>邮箱供应商</span></a>
-                        </li>
-                    {% endif %}
+                    <li><a href="{{ url_for('main.email_server') }}"><i class="fa fa-circle-o"></i>
+                        <span>邮箱管理</span></a>
+                    </li>
+                    <li><a href="{{ url_for('main.email_support') }}"><i class="fa fa-circle-o"></i>
+                        <span>邮箱供应商</span></a>
+                    </li>
                 </ul>
             </li>
             <li class="treeview">
