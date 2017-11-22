@@ -21,8 +21,8 @@
         <section class="content">
             <div class="box">
                 <div class="box-header with-border">
-                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-default">
-                        火箭发射
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#update">
+                        新增角色
                     </button>
                 </div>
                 <div class="box-body">
@@ -31,28 +31,71 @@
             </div>
         </section>
     </div>
-    <div class="modal fade" id="modal-default">
+    <!--弹出Ztree模态框-->
+    <div class="modal fade" id="ztree_modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">模态框</h4>
+                    <div class="modal-title">
+                        <span id="ztree-title">Ztree模态框</span>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <ul id="lzh" class="ztree"></ul>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">关闭</button>
-                    <button type="button" class="btn btn-primary">很油</button>
+                    <button type="button" class="btn btn-primary" id="relational">关联</button>
                 </div>
             </div>
         </div>
     </div>
-
+    <!--更新修改弹出模态框-->
+    <div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <span id="modal-title">添加新的角色</span>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <form id="roles" class="form-horizontal">
+                        <div class="form-group" id="user">
+                            <label class="col-sm-3 control-label">
+                                <span>用户名</span>
+                            </label>
+                            <div class="col-sm-8">
+                                <input class=" form-control" name="user">
+                            </div>
+                        </div>
+                        <div class="form-group" id="description">
+                            <label class="col-sm-3 control-label">
+                                <span>备注</span>
+                            </label>
+                            <div class="col-sm-8">
+                                <input class=" form-control" name="description">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        关闭
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="save">
+                        提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="text/html" id="barDemo">
-        <a class="layui-btn layui-btn-mini" lay-event="edit">授权</a>
-        <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">删除</a>
+        <a class="layui-btn layui-btn-xs" lay-event="auth">权限关联</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs " lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
     </script>
 
 {% endblock %}
@@ -60,62 +103,246 @@
     {{ super() }}
     <!-- layui的js -->
     <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
+    <!-- ztree的js -->
     <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.all.js') }}"></script>
+    <!-- 验证样式validator的js -->
+    <script src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
     <script>
+        //模态框居中
+        $('#update,#ztree_modal').on('show.bs.modal', function () {
+            $('#roles').bootstrapValidator('resetForm', true);
+            $("#modal-title").text("添加新的角色");
+            data_id = 0
+            var $this = $(this);
+            var $modal_dialog = $this.find('.modal-dialog');
+            // 关键代码，如没将modal设置为 block，则$modala_dialog.height() 为零
+            $this.css('display', 'block');
+            $modal_dialog.css({'margin-top': Math.max(0, ($(window).height() - $modal_dialog.height()) / 2)});
+        });
+        //验证
+        $(function () {
+            $("#roles").bootstrapValidator({
+                message: '这个值是无效的',
+                feedbackIcons: {
+                    /*input状态样式图片*/
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    user: {
+                        message: 'user验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '用户不能为空'
+                            },
+                        }
+                    },
+                    description: {
+                        message: 'description验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '备注不能为空'
+                            }
+                        }
+                    },
+                }
+            });
+        });
+
         var table = layui.table;
         //方法级渲染
         table.render({
             elem: '#demo', //指定原始表格元素选择器（推荐id选择器）
             id: 'lzh', //设定容器唯
+            url: '{{ url_for('auth.roles_query') }}',
             height: 400, //设定容器高度
             skin: 'row', //列边框风格
             even: true, //开启隔行背景
             page: true, //开启分页
             limit: 25,
             limits: [10, 25, 50, 100],
-            data: [{'id': 1, 'user': 'lzh', 'text': '发财'},{'id': 2, 'user': 'NBHD', 'text': '喝汤'}],
             //标题栏
             cols: [[
-                {field: 'id', title: 'ID', width: 150},
-                {field: 'user', title: '用户', sort: true, width: 150},
-                {field: 'text', title: '备注', sort: true, width: 200},
-                {fixed: 'right', title: '操作', width: 150, align: 'center', toolbar: '#barDemo'}
+                {field: 'id', title: 'ID'},
+                {field: 'user', title: '用户', sort: true},
+                {field: 'text', title: '备注', sort: true},
+                {fixed: 'right', title: '操作', align: 'center', toolbar: '#barDemo'}
             ]],
         });
 
-        //工具条回调函数
+        //表格工具条回调函数
         table.on('tool(test)', function (obj) {
             var data = obj.data; //获得当前行数据
             var layEvent = obj.event; //获得 lay-event 对应的值
             var tr = obj.tr; //获得当前行 tr 的DOM对象
 
-            if (layEvent === 'edit') {
-                layer.msg('edit');
+            if (layEvent === 'auth') {
+                role_id = data.id
+                $("#ztree_modal").modal("show");
+                $("#ztree-title").text("修改的用户:" + data.user);
+                createZtree(data.id);
+                // 关联按钮
+
             }
             else if (layEvent === 'del') {
-                layer.alert('编辑行：<br>'+ JSON.stringify(data));
+                //layer.alert('编辑行：<br>' + JSON.stringify(data));
+                //删除按钮
+                layer.confirm('是否确定删除:' + data.user, {
+                        btn: ['删除', '取消']//可以无限个按钮
+                    }, function () {
+                        $.ajax({
+                            url: "{{ url_for("auth.roles_delete") }}",
+                            type: "POST",
+                            data: {'id': data.id},
+                            dataType: "json",
+                            success: function (res) {
+                                if (res.message == 'succeed') {
+                                    table.reload('lzh');
+                                    layer.msg('删除完成');
+                                }
+                                else {
+                                    alert('后端抛出异常:' + res.message);
+                                }
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert("出错,无法提交请求到后端" + errorThrown)
+                            }
+                        });
+                    }
+                )
+            }
+            else if (layEvent === 'edit') {
+                $("#update").modal("show");
+                $("input[name='user']").val(data.user);
+                $("input[name='description']").val(data.text);
+                $("#modal-title").text("修改的id:" + data.id);
+                //全局变量
+                data_id = data.id
             }
 
         });
 
-        //以下是ztree的设定
-        var zTreeObj;
-        // zTree 的参数配置
-        var zNodes = [
-            {
-                name: "test1", open: true, children: [
-                {name: "test1_1"}, {name: "test1_2"}]
-            },
-            {
-                name: "test2", open: true, children: [
-                {name: "test2_1"}, {name: "test2_2"}]
+        //新增&删除的ajax数据
+        function json_Data(id) {
+            if (!id) {
+                id = 0
             }
-        ];
-        var setting = {
-            check: {
-                enable: true
+            var data = $("#roles").serialize()
+            if (id != 0) {
+                var json = data + "&id=" + id
+                return json
+            }
+            else {
+                var json = data + "&id=0"
+                return json
             }
         };
-        zTreeObj = $.fn.zTree.init($("#lzh"), setting, zNodes);
+
+        // 增加修改按钮
+        $("#save").on('click', function () {
+            var bootstrapValidator = $('#roles').data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if (bootstrapValidator.isValid()) {
+                $.ajax({
+                    url: "{{ url_for("auth.roles_edit") }}",
+                    type: "POST",
+                    data: json_Data(data_id),
+                    dataType: "json",
+                    success: function (res) {
+                        if (res.message == 'succeed') {
+                            $('#update').modal('hide');
+                            table.reload('lzh');
+                            layer.msg('修改完成');
+                        }
+                        else {
+                            alert('后端抛出异常:' + res.message);
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert("出错,无法提交请求到后端" + errorThrown)
+                    }
+                });
+            }
+            else {
+                layer.msg('表单验证失败');
+            }
+
+        });
+        //关联按钮
+        $('#relational').on('click', function () {
+            var treeObj = $.fn.zTree.getZTreeObj("lzh");
+            var checkedNodes = treeObj.getCheckedNodes()
+            console.log(checkedNodes)
+            var data = {
+                "role_id": role_id,
+                "empty": null,
+                "selecd": []
+            }
+            if (Object.prototype.toString.call(checkedNodes) === '[object Array]' && checkedNodes.length === 0) {
+                data["empty"] = true
+            }
+            else {
+                data["empty"] = false
+                $.each(checkedNodes, function (i, value) {
+                    data["selecd"].push({"id": value.id})
+                });
+
+            }
+
+            var data_Obj = JSON.stringify(data)
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('auth.relational') }}",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: data_Obj,
+                success: function (res) {
+                    if (res.message == 'succeed') {
+                        //treeObj.reAsyncChildNodes(null, "refresh");
+                        $("#ztree_modal").modal("hide")
+                        layer.msg("排序成功刷新ztree");
+                    }
+                    else {
+                        alert('后端抛出异常:' + res.message);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("前端出错,无法提交请求到后端" + errorThrown)
+                }
+            });
+        });
+
+        //创建Ztree
+        function createZtree(id) {
+            //以下是ztree的设定
+            var zTreeObj;
+
+            // ztree设置
+            var setting = {
+                async: {
+                    enable: true,//采用异步加载
+                    type: "get",
+                    //autoParam: ["id"],//自动提交父ID
+                    otherParam: {"id": id},
+                    url: "{{ url_for('auth.query_node') }}",
+                    dataType: "json"
+                },
+                callback: {},
+                data: {
+                    simpleData: {
+                        enable: true,
+                        idKey: "id",
+                        pIdKey: "pId",
+                        rootPId: 0
+                    }
+                },
+                check: {
+                    enable: true
+                },
+            };
+            setting.check.chkboxType = {"Y": "ps", "N": "ps"};
+            zTreeObj = $.fn.zTree.init($("#lzh"), setting);
+        };
     </script>
 {% endblock scripts %}
