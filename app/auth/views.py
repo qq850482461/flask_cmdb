@@ -1,17 +1,9 @@
 from . import auth
-from .. import db, admin_permission
+from .. import db
 from ..models import User, Role, Node
-from flask import redirect, render_template, request, url_for, flash, jsonify
+from flask import redirect, render_template, request, url_for, flash, jsonify, session, g
 from flask_login import login_user, logout_user, current_user, login_required
-from flask_principal import Identity, AnonymousIdentity, identity_changed, current_app, IdentityContext
-
-
-# # 上下文
-# @auth.app_context_processor
-# def context():
-#     admin = IdentityContext(admin_permission)
-#     return dict(admin=admin)
-
+from operator import attrgetter
 
 # 登录
 @auth.route('/login', methods=['GET', 'POST'])
@@ -26,10 +18,38 @@ def login():
                 login_user(user, remember=True)
             else:
                 login_user(user)
-            # 身份变化
-            identity_changed.send(
-                current_app._get_current_object(),
-                identity=Identity(user.id))
+
+            nodes = current_user.roles[0].nodes
+            # 当前登录用户拥有的父菜单类
+            parent_lists = [i for i in nodes if i.parent_id == 0]
+            # 当前登录用户拥有的子菜单
+            child_lists = [i for i in nodes if i.parent_id != 0]
+            # 父菜单根据order排序
+            parent_order = sorted(parent_lists, key=attrgetter("order"))
+            # 最终传给jinja2前端的列表
+            nodes_order = []
+            # 序列化
+            for i in parent_order:
+                query = [child for child in child_lists if i.id == child.parent_id]
+                # 有子菜单
+                if query:
+                    dic = {}
+                    order = sorted(query, key=attrgetter("order"))
+                    child_list_order = [{'name': i.label, 'url': i.url, 'icon': i.icon} for i in order]
+                    dic[i.label] = child_list_order
+                    nodes_order.append(dic)
+                else:
+                    dic = {}
+                    node = [{'name': i.label, 'url': i.url, 'icon': i.icon}]
+                    dic['index'] = node
+                    nodes_order.append(dic)
+            # 传递到session
+            session['menu'] = nodes_order
+
+            # # 身份变化
+            # identity_changed.send(
+            #     current_app._get_current_object(),
+            #     identity=Identity(user.id))
 
             return redirect(url_for('main.index'))
         else:
@@ -42,9 +62,9 @@ def login():
 def logout():
     logout_user()
     # 注销后身份变成匿名
-    identity_changed.send(
-        current_app._get_current_object(),
-        identity=AnonymousIdentity())
+    # identity_changed.send(
+    #     current_app._get_current_object(),
+    #     identity=AnonymousIdentity())
     return redirect(url_for('auth.login'))
 
 
@@ -75,111 +95,12 @@ def resetpw():
 def menu():
     return render_template('menu.html')
 
+
 # 角色页面
 @auth.route('/roles', methods=['GET', 'POST'])
 @login_required
 def role():
     return render_template('role.html')
-
-
-# # 菜单管理API查询接口
-# @auth.route('/api/menu/query', methods=['GET'])
-# @login_required
-# def query_node():
-#     p_lists = Node.query.filter_by(parent_id=0).order_by(Node.order).all()
-#     c_lists = Node.query.filter(Node.parent_id != 0).order_by(Node.order).all()
-#     req = []
-#     for i in (p_lists + c_lists):
-#         y = {
-#             "id": i.id,
-#             "pId": i.parent_id,
-#             "name": i.label,
-#             "url": i.url,
-#             "order": i.order,
-#             "ico": i.icon
-#         }
-#         if i.parent_id == 0:
-#             y["childOuter"] = False
-#             y["open"] = True
-#         req.append(y)
-#
-#     return jsonify(req)
-#
-#
-# # 菜单管理API删除接口
-# @auth.route('/api/menu/delete', methods=['POST'])
-# @login_required
-# def menu_delete():
-#     id = request.values.get('id')
-#     res = {'message': "succeed"}
-#     if id is not None:
-#         node = Node.query.get(int(id))
-#         try:
-#             db.session.delete(node)
-#             db.session.commit()
-#             return jsonify(res)
-#         except Exception as e:
-#             res['message'] = e.__repr__()
-#             return jsonify(res)
-#
-#
-# # 菜单管理修改_新增API接口
-# @auth.route('/api/menu/add', methods=['POST'])
-# @login_required
-# def menu_add():
-#     id = int(request.values.get('id'))
-#     node = Node.query.get(int(id))
-#     res = {'status': 200, 'message': "succeed"}
-#     # 修改内容
-#     if id != 0 and node is not None:
-#         node.parent_id = request.values.get('pId')
-#         node.url = request.values.get('url')
-#         node.label = request.values.get('label')
-#         node.order = request.form['order']
-#         node.icon = request.values.get('ico')
-#         try:
-#             db.session.commit()
-#             return jsonify(res)
-#         except Exception as e:
-#             db.session.rollback()
-#             res['message'] = e.__repr__()
-#             return jsonify(res)
-#     # 新增
-#     elif id == 0:
-#         order = request.form['order']
-#         node = Node(order=order, label="新节点", parent_id=0)
-#         try:
-#             db.session.add(node)
-#             db.session.commit()
-#             return jsonify(res)
-#         except Exception as e:
-#             db.session.rollback()
-#             res['message'] = e.__repr__()
-#             return jsonify(res)
-#     else:
-#         res['message'] = 'failed'
-#         return jsonify(res)
-#
-#
-# # 菜单排序API接口
-# @auth.route('/api/menu/order', methods=['POST'])
-# @login_required
-# def order():
-#     data = request.get_json()
-#     res = {'message': "succeed"}
-#     if data is not None:
-#         for i in data:
-#             id = i["id"]
-#             order = i["order"]
-#             try:
-#                 node = Node.query.get(int(id))
-#                 node.order = int(order)
-#                 db.session.commit()
-#             except Exception as e:
-#                 db.session.rollback()
-#                 res['message'] = e.__repr__()
-#                 return jsonify(res)
-#         return jsonify(res)
 
 
 # 增加用户
@@ -248,4 +169,3 @@ def edit_user():
             db.session.commit()
             res = {"message": 200}
             return jsonify(res)
-

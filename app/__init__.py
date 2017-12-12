@@ -1,4 +1,4 @@
-from flask import Flask, abort, request
+from flask import Flask, abort, request, g, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
 from flask_principal import Principal, Permission, RoleNeed, identity_loaded, UserNeed
@@ -19,10 +19,14 @@ admin_permission = Permission(RoleNeed('admin'), RoleNeed('skt'))
 def permission(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        nodes = current_user.roles[0].nodes
-        url_menu = [x.url for x in nodes]
-        if request.path not in url_menu:
-           abort(403)
+        try:
+            nodes = current_user.roles[0].nodes
+            url_menu = [x.url for x in nodes]
+        except:
+            abort(500)
+        else:
+            if request.path not in url_menu:
+                abort(403)
         return func(*args, **kwargs)
 
     return decorated_view
@@ -60,5 +64,3 @@ def create_app():
     app.register_blueprint(property_blueprint)
 
     return app
-
-
