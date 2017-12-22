@@ -22,8 +22,7 @@ def query_node():
         p_lists = Node.query.filter_by(parent_id=0).order_by(Node.order).all()
         c_lists = Node.query.filter(Node.parent_id != 0).order_by(Node.order).all()
     except Exception as e:
-        print(e)
-        return jsonify({'message': 'failed'})
+        return jsonify({'message': repr(e)})
     else:
         req = []
         for i in (p_lists + c_lists):
@@ -60,7 +59,7 @@ def menu_delete():
             db.session.commit()
             return jsonify(res)
         except Exception as e:
-            res['message'] = e.__repr__()
+            res['message'] = repr(e)
             return jsonify(res)
 
 
@@ -83,7 +82,7 @@ def menu_add():
             return jsonify(res)
         except Exception as e:
             db.session.rollback()
-            res['message'] = e.__repr__()
+            res['message'] = repr(e)
             return jsonify(res)
     # 新增
     elif id == 0:
@@ -95,7 +94,7 @@ def menu_add():
             return jsonify(res)
         except Exception as e:
             db.session.rollback()
-            res['message'] = e.__repr__()
+            res['message'] = repr(e)
             return jsonify(res)
     else:
         res['message'] = 'failed'
@@ -118,7 +117,7 @@ def order():
                 db.session.commit()
             except Exception as e:
                 db.session.rollback()
-                res['message'] = e.__repr__()
+                res['message'] = repr(e)
                 return jsonify(res)
         return jsonify(res)
 
@@ -128,7 +127,6 @@ def order():
 @login_required
 def relational():
     data = request.get_json()
-    # print(data)
     res = {'message': "succeed"}
     if data is not None:
         role_id = data['role_id']

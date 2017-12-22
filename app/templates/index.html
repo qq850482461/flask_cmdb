@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 {% block styles %}
     {{ super() }}
-    <meta name="lzh" content="测试模版是否会写入这一段代码">
-{% endblock %}
 
-{% block title %}测试首页{% endblock title %}
+{% endblock %}
+{% block title %}开发中的测试首页{% endblock title %}
 {% block content %}
     <div class="content-wrapper">
         <section class="content-header">
@@ -19,13 +18,14 @@
         </section>
 
         <section class="content container-fluid">
+
             <h1>{{ name }}</h1>
             <h1>{{ g.string }}</h1>
+            <h1>{{ test|icon(0) }}</h1>
         </section>
     </div>
 {% endblock %}
-
 {% block scripts %}
     {{ super() }}
-    <!--我就是测试一下能不重写父模块-->
+
 {% endblock %}

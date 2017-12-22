@@ -42,27 +42,27 @@ def roles_query():
 @auth.route('/api/roles/edit', methods=['POST'])
 @login_required
 def roles_edit():
-    id = request.values.get('id')
+    user_id = request.values.get('id')
     user = request.values.get('user')
     description = request.values.get('description')
 
     res = {'message': "succeed"}
     # 根据ID新增
-    if id is not None and int(id) == 0:
+    if user_id is not None and int(user_id) == 0:
         try:
-            role = Role.query.get(int(id))
+            # role = Role.query.get(int(user_id))
+            new_role = Role(name=user, description=description)
+            db.session.add(new_role)
+            db.session.commit()
         except Exception as e:
             res['message'] = repr(e)
             return jsonify(res)
         else:
-            new_role = Role(name=user, description=description)
-            db.session.add(new_role)
-            db.session.commit()
             return jsonify(res)
     # 根据ID修改
-    elif id is not None and int(id) > 0:
+    elif user_id is not None and int(user_id) > 0:
         try:
-            role = Role.query.get(int(id))
+            role = Role.query.get(int(user_id))
         except Exception as e:
             res['message'] = repr(e)
             return jsonify(res)
@@ -80,12 +80,12 @@ def roles_edit():
 @auth.route('/api/roles/delete', methods=['POST'])
 @login_required
 def roles_delete():
-    id = request.values.get('id')
+    user_id = request.values.get('id')
     res = {'message': "succeed"}
 
-    if id is not None:
+    if user_id is not None:
         try:
-            role = Role.query.get(int(id))
+            role = Role.query.get(int(user_id))
             db.session.delete(role)
             db.session.commit()
             return jsonify(res)

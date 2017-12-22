@@ -10,12 +10,6 @@
             <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
             <link rel="stylesheet"
                   href="{{ url_for('static',filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
-            <!-- Font Awesome -->
-            <link rel="stylesheet"
-                  href="{{ url_for('static',filename='bower_components/font-awesome/css/font-awesome.min.css') }}">
-            <!-- 图标 -->
-            <link rel="stylesheet"
-                  href="{{ url_for('static',filename='bower_components/Ionicons/css/ionicons.min.css') }}">
             <!-- select2 -->
             <link rel="stylesheet"
                   href="{{ url_for('static',filename='bower_components/select2/dist/css/select2.min.css') }}">
@@ -26,20 +20,19 @@
             <!-- Google Font -->
             <link rel="stylesheet"
                   href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+            <!-- Font Awesome小图标 -->
+            <link rel="stylesheet"
+                  href="{{ url_for('static',filename='bower_components/font-awesome/css/font-awesome.min.css') }}">
         {% endblock styles %}
     {% endblock head %}
 </head>
-
 <body class="hold-transition skin-blue sidebar-mini">
 {% block body %}
     <div class="wrapper">
         {% include 'includes/_navbar.html' %}
         {% include 'includes/_left_menu.html' %}
-        <!-- 内容包装器，包含页面内容 -->
         {% block content %}
-
         {% endblock content %}
-        <!-- Footer -->
         {% block footer %}
             <footer class="main-footer">
                 <strong>Copyright &copy; 2017 <a href="#">佚名</a></strong>
@@ -47,17 +40,16 @@
         {% endblock footer %}
         <div class="control-sidebar-bg"></div>
     </div>
-
     {% block scripts %}
         <!-- jQuery 3 -->
-        <script src="{{ url_for('static',filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static',filename='bower_components/jquery/dist/jquery.js') }}"></script>
         <!-- Bootstrap 3.3.7 -->
         <script src="{{ url_for('static',filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
         <!-- AdminLTE App -->
         <script src="{{ url_for('static',filename='dist/js/adminlte.min.js') }}"></script>
+        <!--当前页面添加active-->
         <script>
             var url = window.location;
-            // 当前页面添加active
             $('ul.sidebar-menu a').filter(function () {
                 return this.href == url;
             }).parent().addClass('active');

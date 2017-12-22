@@ -21,7 +21,7 @@ def query_email_support():
             'web': i.web,
             'username': i.username,
             'password': i.password,
-            'created': i.created_time
+            'created': i.created_time.strftime('%Y-%m-%d %H:%M:%S')
         }
         data.append(x)
     rep['data'] = data

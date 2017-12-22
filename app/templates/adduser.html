@@ -1,25 +1,12 @@
 {% extends 'base.html' %}
-
 {% block styles %}
     {{ super() }}
-    <!-- 选择器JS -->
-    <link rel="stylesheet" href="{{ url_for('static',filename='bower_components/select2/dist/css/select2.min.css') }}">
-    <!--加载动画-->
-    <link rel="stylesheet" href="{{ url_for('static',filename='bower_components/style.css') }}">
-
+    <!-- layui样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">
+    <!-- 验证样式 -->
+    <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
 {% endblock styles %}
 {% block content %}
-    <ul id="spinners">
-        <li id="loadding">
-            <div id="preloader_1">
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </li>
-    </ul>
     <div class="content-wrapper">
         <section class="content-header">
             <h1>
@@ -28,296 +15,285 @@
             </h1>
         </section>
         <section class="content">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">用户列表</h3>
+            <div class="box">
+                <div class="box-header">
+                    <button class="layui-btn layui-btn-sm" data-toggle="modal" data-target="#update">增加用户</button>
                 </div>
-                <div class="panel-body">
-                    <div class="pull-right">
-                        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#adduser">
-                            <i class="fa fa-plus"></i><span>增加用户</span>
-                        </button>
-                    </div>
-                </div>
-                <table class="table table-bordered table-hover text-center">
-                    <thead>
-                    <th width="25%">ID</th>
-                    <th width="25%">用户名</th>
-                    <th width="25%">角色</th>
-                    <th width="25%">窒息的操作</th>
-                    </thead>
-                    <tbody>
-                    {% for i in test %}
-                        <tr>
-                            <td>{{ i.id }}</td>
-                            <td class="td-name">{{ i.username }}</td>
-                            <td>
-                                {% for role in i.roles %}
-                                    <span class="badge bg-light-blue">{{ role.name }}</span>
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <button type="button" class="fa fa-cog" data-toggle="modal" data-target="#update"
-                                        onclick="return get_edit_info({{ i.id }})"></button>
-                                &nbsp;
-                                <button type="button" class="fa fa-trash-o" onclick="delect_info({{ i.id }})"></button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <!--提交模态框-->
-            <div class="modal fade" id="adduser" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <div class="modal-title">
-                                <span>用户信息</span>
-                            </div>
-                        </div>
-                        <div class="modal-body">
-                            <form id="test" class="form-horizontal">
-                                <div class="form-group" id="user">
-                                    <label class="col-sm-3 control-label">
-                                        <span>用户名</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <input class="form-control" name="user">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">
-                                        <span>角色</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <select name="select" class="form-control select2" multiple="multiple"
-                                                data-placeholder="分配角色"
-                                                style="width: 100%; ">
-                                            {% for role in roles %}
-                                                <option>{{ role.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group" id="password">
-                                    <label class="col-sm-3 control-label">
-                                        <span>密码</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <input class=" form-control" name="password">
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">
-                                关闭
-                            </button>
-                            <button type="submit" class="btn btn-primary" id="add">
-                                提交
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!--更新模态框-->
-            <div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-                 aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <div class="modal-title">
-                                <span>更新用户信息</span>
-                            </div>
-                        </div>
-                        <div class="modal-body">
-                            <form class="form-horizontal update">
-                                <div class="form-group" id="user">
-                                    <label class="col-sm-3 control-label">
-                                        <span>用户名</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <input class="form-control" name="user" id="update_user">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-sm-3 control-label">
-                                        <span>角色</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <select name="select" class="form-control select2" multiple="multiple"
-                                                data-placeholder="分配角色"
-                                                style="width: 100%; ">
-                                            {% for role in roles %}
-                                                <option>{{ role.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="form-group" id="password">
-                                    <label class="col-sm-3 control-label">
-                                        <span>密码</span>
-                                    </label>
-                                    <div class="col-sm-8">
-                                        <input class=" form-control" name="password">
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-dismiss="modal">
-                                关闭
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                更新
-                            </button>
-                        </div>
-                    </div>
+                <div class="box-body">
+                    <table id="demo" lay-filter="test"></table>
                 </div>
             </div>
         </section>
     </div>
+    <!--更新修改弹出模态框-->
+    <div class="modal fade" id="update" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <span id="modal-title">添加新的角色</span>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <form id="roles" class="form-horizontal">
+                        <div class="form-group" id="user">
+                            <label class="col-sm-3 control-label">
+                                <span>用户名</span>
+                            </label>
+                            <div class="col-sm-8">
+                                <input class=" form-control" name="user">
+                            </div>
+                        </div>
+                        <div class="form-group" id="pwd">
+                            <label class="col-sm-3 control-label">
+                                <span>密码</span>
+                            </label>
+                            <div class="col-sm-8">
+                                <input class="form-control" type="password" name="pwd">
+                            </div>
+                        </div>
+                        <div class="form-group" id="select">
+                            <label class="col-sm-3 control-label">
+                                <span>角色关联</span>
+                            </label>
+                            <div class="col-sm-8">
+                                <select name="select_role" id='select_role' class="form-control select2"
+                                        style="width: 100%;">
+                                    {% for i in roles %}
+                                        <option disabled selected value></option>
+                                        <option value="{{ i.name }}">{{ i.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">
+                        关闭
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="save">
+                        提交
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-normal layui-btn-xs " lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
 {% endblock content %}
 {% block scripts %}
     {{ super() }}
     <script src="{{ url_for('static',filename='bower_components/select2/dist/js/select2.full.min.js') }}"></script>
-
+    <!-- layui的js -->
+    <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
+    <!--验证js-->
+    <script type="application/javascript"
+            src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
     <script>
         //模态框居中
-        $("[data-toggle='modal']").click(function () {
-            var _target = $(this).attr('data-target')
-            t = setTimeout(function () {
-                var _modal = $(_target).find(".modal-dialog")
-                _modal.animate({'margin-top': parseInt(($(window).height() - _modal.height()) / 2)}, 300)
-            }, 200)
+        $('#update,#ztree_modal').on('show.bs.modal', function () {
+            $('#roles').bootstrapValidator('resetForm', true);
+            $("#modal-title").text("添加新的角色");
+            data_id = 0
+            var $this = $(this);
+            var $modal_dialog = $this.find('.modal-dialog');
+            // 关键代码，如没将modal设置为 block，则$modala_dialog.height() 为零
+            $this.css('display', 'block');
+            $modal_dialog.css({'margin-top': Math.max(0, ($(window).height() - $modal_dialog.height()) / 2)});
         });
-
-        //模态框新增提交表单
-        $("#add").click(function () {
-            var user = $("input[name='user']").val();
-            var password = $("input[name='password']").val();
-            //var select = $(".select2 option:selected").text();
-
-            //判断user
-            if (user.length == 0) {
-                $("#user").addClass("has-error");
-                $(".col-sm-8:first").append('<span class="help-block">用户名不能为空</span> ');
-                return false;
-            }
-            else {
-                $("#user").removeClass("has-error");
-                $(".help-block:first").remove();
-            }
-
-            //判断password
-            if (password.length == 0) {
-                $("#password").addClass("has-error");
-                $(".col-sm-8:last").append('<span class="help-block">密码不能为空</span> ');
-                return false;
-            }
-            else {
-                $("#password").removeClass("has-error");
-                $(".help-block").remove();
-            }
-            //提交表单
-            console.log($('#test').serialize())
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('auth.adduser') }}",
-                data: $('#test').serialize(),
-                success: function (res) {
-                    if (res.message == "error") {
-                        $("#user").addClass("has-error");
-                        $(".col-sm-8:first").append('<span class="help-block">用户名重复</span> ');
-                        return false;
-                    }
-                    else {
-                        $('#adduser').modal('hide')
-                        $("#loadding").addClass("active")
-                        setTimeout("location.reload()", 1700)
-                    }
-                },
-                error: function () {
-                    alert("出错！无法提交到后台")
-                }
-            });
-        });
-        //编辑表单
-        function get_edit_info(id) {
-            if (!id) {
-                alert('不要修改ID，错误')
-                return false;
-            }
-
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('auth.edit_user') }}",
-                data: {"id": id, "act": "query"},
-                success: function (data) {
-                    if (data) {
-                        //赋值
-                        $("#update_user").val(data.username);
-                        //$("#update_user").attr("disabled", "disabled");
-
-                    }
-                    else {
-                        alert("都没有回调函数。。。出错了")
-                    }
-                },
-            });
-
-        }
-        //删除
-        function delect_info(id) {
-            if (!id) {
-                alert('不要修改ID，错误')
-                return false;
-            }
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('auth.edit_user') }}",
-                data: {"id": id, "act": "delect"},
-                success: function (data) {
-                    if (data.message == 200) {
-                        $("#loadding").addClass("active")
-                        setTimeout("location.reload()", 1700)
-                    }
-                    else {
-                        alert("都没有回调函数。。。出错了")
-                    }
-                },
-            });
-        }
-        //更新表单
-        $(".btn.btn-success").click(function () {
-            var user = $("#update_user").val();
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('auth.adduser') }}",
-                data: $('.form-horizontal.update').serialize(),
-                success: function (res) {
-                    if (res.message == "error") {
-                        $("#user").addClass("has-error");
-                        $(".col-sm-8:first").append('<span class="help-block">用户名重复</span> ');
-                        return false;
-                    }
-                    else {
-                        $('#update').modal('hide')
-                        $("#loadding").addClass("active")
-                        setTimeout("location.reload()", 1500)
-                    }
-                },
-                error: function () {
-                    alert("出错！无法提交到后台")
-                }
-            });
-        });
-
-        //装载多选项卡
+    </script>
+    <script>
         $(function () {
-            $('.select2').select2()
-        })
+            $("#roles").bootstrapValidator({
+                message: '这个值是无效的',
+                feedbackIcons: {
+                    /*input状态样式图片*/
+                    valid: 'glyphicon glyphicon-ok',
+                    invalid: 'glyphicon glyphicon-remove',
+                    validating: 'glyphicon glyphicon-refresh'
+                },
+                fields: {
+                    user: {
+                        message: '用户名验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '用户名不能为空'
+                            },
+                            regexp: {
+                                /* 只需加此键值对，包含正则表达式，和提示 */
+                                regexp: /^[a-zA-Z0-9_\.]+$/,
+                                message: '只能是数字和字母_.'
+                            },
+                            callback: {
+                                message: '用户名经被占用',
+                                callback: function (value, validator) {
+                                    var res = true;
+                                    if (data_id === 0) {
+                                        $.ajax({
+                                            url: '{{ url_for('auth.repeat_user') }}',
+                                            type: 'get',
+                                            dataType: 'json',
+                                            async: false,
+                                            data: {'user': value},
+                                            success: function (data) {
+                                                if (data.status != 'success') {
+                                                    res = false;
+                                                }
+                                            },
+                                            error: function () {
+                                                alert("出错！无法提交请求到后端")
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        var res = true;
+                                    }
+                                    return res;
+                                }
+                            }
+                        }
+                    },
+                    pwd: {
+                        message: '密码验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '密码不能为空'
+                            },
+                            regexp: {
+                                /* 只需加此键值对，包含正则表达式，和提示 */
+                                regexp: /^[a-zA-Z0-9_\.]+$/,
+                                message: '只能是数字和字母_.'
+                            },
+                        }
+                    },
+                    select_role: {
+                        message: '选项验证失败',
+                        validators: {
+                            notEmpty: {
+                                message: '选项不能为空'
+                            }
+                        }
+                    }
+
+                }
+            });
+        });
+    </script>
+    <script>
+
+        //初始化select2选项卡
+        var select2 = $('#select_role').select2({
+            placeholder: '请选择角色',
+            //data:datas
+            //allowClear: true
+        });
+    </script>
+    <script>
+        var table = layui.table;
+        //方法级渲染
+        table.render({
+            elem: '#demo', //指定原始表格元素选择器（推荐id选择器）
+            id: 'lzh', //设定容器唯
+            url: '{{ url_for('auth.userss_query') }}',
+            height: 400, //设定容器高度
+            skin: 'row', //列边框风格
+            even: true, //开启隔行背景
+            page: true, //开启分页
+            limit: 25,
+            limits: [10, 25, 50, 100],
+            //标题栏
+            cols: [[
+                {field: 'id', title: 'ID'},
+                {field: 'user', title: '用户', sort: true},
+                {field: 'role', title: '角色',},
+                {field: 'time', title: '注册时间', sort: true},
+                {fixed: 'right', title: '操作', align: 'center', toolbar: '#barDemo'}
+            ]],
+        });
+        //表格工具条回调函数
+        table.on('tool(test)', function (obj) {
+            var data = obj.data; //获得当前行数据
+            var layEvent = obj.event; //获得 lay-event 对应的值
+            var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+            if (layEvent === 'del') {
+                //layer.alert('编辑行：<br>' + JSON.stringify(data));
+                //编辑按钮
+                layer.confirm('是否确定删除:' + data.user, {
+                        btn: ['删除', '取消']//可以无限个按钮
+                    }, function () {
+                        $.ajax({
+                            url: "{{ url_for("auth.users_delete") }}",
+                            type: "POST",
+                            data: {'id': data.id},
+                            dataType: "json",
+                            success: function (res) {
+                                if (res.status == 'succee') {
+                                    table.reload('lzh');
+                                    layer.msg('删除完成');
+                                }
+                                else {
+                                    alert('后端抛出异常:' + res.status);
+                                }
+                            },
+                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                alert("出错,无法提交请求到后端" + errorThrown)
+                            }
+                        });
+                    }
+                )
+            }
+            else if (layEvent === 'edit') {
+                $("#update").modal("show");
+                data_id = data.id
+                $("input[name='user']").val(data.user);
+                $("input[name='pwd']").val('');
+                $("#select_role").val(data.role).trigger("change");
+                $("#modal-title").text("修改的用户名:" + data.user);
+            }
+
+        });
+    </script>
+    <script>
+        //序列化data进行区分增 改操作
+        function get_data() {
+            var data = $('#roles').serialize() + '&' + 'id=' + data_id
+            return data
+        }
+        $('#save').on('click', function () {
+            var bootstrapValidator = $('#roles').data('bootstrapValidator');
+            bootstrapValidator.validate();
+            if (bootstrapValidator.isValid()) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('auth.edit_user') }}",
+                    data: get_data(),
+                    success: function (res) {
+                        if (res.status == 'success') {
+                            $('#update').modal('hide');
+                            table.reload('lzh');
+                            layer.msg("提交成功");
+                        }
+                        else if (res.status == 'repeat') {
+                            layer.alert("用户名重复!");
+                        }
+                        else {
+                            alert("后端返回错误！" +
+                                "无法提交到后台")
+                        }
+                    },
+                    error: function () {
+                        alert("出错！无法提交请求到后端")
+                    }
+                });
+            }
+            else {
+                layer.msg("表单验证失败！");
+            }
+        });
     </script>
 {% endblock scripts %}

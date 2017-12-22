@@ -8,17 +8,17 @@
                 {% for key,nodes in group.items() %}
                     {% if key == 'index' %}
                         {% for i in nodes %}
-                            <li><a href="{{ i.url }}"><i class="fa fa-circle-o"></i> <span>{{ i.name }}</span></a></li>
+                            <li><a href="{{ i.url }}"><i class="fa {% if i.icon %}{{ i.icon }}{% else %}fa-circle-o{% endif %}"></i> <span>{{ i.name }}</span></a></li>
                         {% endfor %}
                     {% else %}
                         <li class="treeview">
                             <a href="#">
-                                <i class="fa fa-circle-o"></i> <span>{{ key }}</span>
+                                <i class="fa {{ key|icon(1) }}"></i> <span>{{ key|icon(0) }}</span>
                                 <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>
                             </a>
                             <ul class="treeview-menu">
                                 {% for i in nodes %}
-                                    <li><a href="{{ i.url }}"><i class="fa fa-circle-o"></i>{{ i.name }}</a>
+                                    <li><a href="{{ i.url }}"><i class="fa {% if i.icon %}{{ i.icon }}{% else %}fa-circle-o{% endif %}"></i>{{ i.name }}</a>
                                     </li>
                                 {% endfor %}
                             </ul>
@@ -26,47 +26,6 @@
                     {% endif %}
                 {% endfor %}
             {% endfor %}
-            <!-- jinja2 -->
-{#            <li><a href="{{ url_for('main.index') }}"><i class="fa fa-laptop"></i> <span>主页</span></a></li>#}
-{#            <li class="treeview">#}
-{#                <a href="#">#}
-{#                    <i class="fa fa-envelope-o"></i> <span>邮箱管理</span>#}
-{#                    <span class="pull-right-container">#}
-{#              <i class="fa fa-angle-left pull-right"></i>#}
-{#            </span>#}
-{#                </a>#}
-{#                <ul class="treeview-menu">#}
-{#                    <li><a href="{{ url_for('main.email') }}"><i class="fa fa-circle-o"></i> <span>查询邮箱</span></a>#}
-{#                    </li>#}
-{#                    <li><a href="{{ url_for('main.email_server') }}"><i class="fa fa-circle-o"></i>#}
-{#                        <span>邮箱管理</span></a>#}
-{#                    </li>#}
-{#                    <li><a href="{{ url_for('main.email_support') }}"><i class="fa fa-circle-o"></i>#}
-{#                        <span>邮箱供应商</span></a>#}
-{#                    </li>#}
-{#                </ul>#}
-{#            </li>#}
-{#            <li class="treeview">#}
-{#                <a href="#">#}
-{#                    <i class="fa fa-laptop"></i> <span>资产管理</span>#}
-{#                    <span class="pull-right-container"><i class="fa fa-angle-left pull-right"></i></span>#}
-{#                </a>#}
-{#                <ul class="treeview-menu">#}
-{#                    <li><a href="{{ url_for('property.ip') }}"><i class="fa fa-circle-o"></i>IP地址池</a></li>#}
-{#                    <li><a href="{{ url_for('property.record') }}"><i class="fa fa-circle-o"></i>登记管理</a></li>#}
-{##}
-{#                </ul>#}
-{#            </li>#}
-{#            <li class="treeview">#}
-{#                <a href="#"><i class="fa fa-user"></i> <span>个人中心</span><span class="pull-right-container"><i#}
-{#                        class="fa fa-angle-left pull-right"></i></span></a>#}
-{#                <ul class="treeview-menu">#}
-{#                    <li><a href="{{ url_for('auth.resetpw') }}"><i class="fa fa-circle-o"></i>修改密码</a></li>#}
-{#                    <li><a href="{{ url_for('auth.adduser') }}"><i class="fa fa-circle-o"></i>增加用户</a></li>#}
-{#                    <li><a href="/menu"><i class="fa fa-circle-o"></i>菜单管理</a></li>#}
-{#                    <li><a href="{{ url_for('auth.role') }}"><i class="fa fa-circle-o"></i>角色管理</a></li>#}
-{#                </ul>#}
-{#            </li>#}
         </ul>
     </section>
 </aside>

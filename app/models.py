@@ -39,7 +39,6 @@ class User(db.Model, UserMixin):
     @property
     def password(self):
         raise AttributeError("密码不允许读取,请使用check_password_hash()进行验证密码")
-        return
 
     # 转换密码为hash存入数据库
     @password.setter
@@ -55,8 +54,8 @@ class User(db.Model, UserMixin):
 class Role(db.Model):
     __tablename__ = 'role'
     id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
+    name = db.Column(db.String(80))
+    description = db.Column(db.String(80))
     # 多对多关联节点
     nodes = db.relationship('Node', secondary='role_node', backref=db.backref('roles', lazy='dynamic'))
 

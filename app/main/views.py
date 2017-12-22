@@ -25,12 +25,13 @@ def page_not_found(error):
 @permission
 def index():
     user_agent = request.headers.get('User-Agent')
-    return render_template('index.html', name=user_agent)
+    return render_template('index.html', name=user_agent,test='index:fuck')
 
 
 # 邮箱运营商web页面,增加修改运营商页面
 @main.route('/email_support/', methods=['GET', 'POST'])
 @login_required
+@permission
 def email_support():
     if request.method == "POST":
         id = request.form['id']
@@ -67,6 +68,7 @@ def email_support():
 # 邮箱服务器管理页面
 @main.route('/email_server/', methods=['GET', 'POST'])
 @login_required
+@permission
 def email_server():
     return render_template('email_server.html')
 
@@ -74,6 +76,7 @@ def email_server():
 # 邮箱查询页面
 @main.route('/email/', methods=['GET', 'POST'])
 @login_required
+@permission
 def email():
     email_server = Emailserver.query.all()
     return render_template('email.html', email_server=email_server)

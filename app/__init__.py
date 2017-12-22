@@ -14,6 +14,17 @@ login_manager.login_message = "请登录后再进行访问该页面！"
 principals = Principal()
 admin_permission = Permission(RoleNeed('admin'), RoleNeed('skt'))
 
+#定义jinja2的过滤器函数
+def get_icon(s,flag):
+    if flag ==0:
+        s = str(s)
+        f = s.split(':')[0]
+        return f
+    else:
+        s = str(s)
+        f = s.split(':')[1]
+        return f
+
 
 # 权限装饰器
 def permission(func):
@@ -62,5 +73,5 @@ def create_app():
     app.register_blueprint(main_blueprint)
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(property_blueprint)
-
+    app.jinja_env.filters['icon'] = get_icon
     return app

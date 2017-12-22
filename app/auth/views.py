@@ -1,9 +1,10 @@
 from . import auth
-from .. import db
+from .. import db,permission
 from ..models import User, Role, Node
 from flask import redirect, render_template, request, url_for, flash, jsonify, session, g
 from flask_login import login_user, logout_user, current_user, login_required
 from operator import attrgetter
+
 
 # 登录
 @auth.route('/login', methods=['GET', 'POST'])
@@ -36,7 +37,8 @@ def login():
                     dic = {}
                     order = sorted(query, key=attrgetter("order"))
                     child_list_order = [{'name': i.label, 'url': i.url, 'icon': i.icon} for i in order]
-                    dic[i.label] = child_list_order
+                    name_icon = i.label + ':' + i.icon
+                    dic[name_icon] = child_list_order
                     nodes_order.append(dic)
                 else:
                     dic = {}
@@ -45,32 +47,23 @@ def login():
                     nodes_order.append(dic)
             # 传递到session
             session['menu'] = nodes_order
-
-            # # 身份变化
-            # identity_changed.send(
-            #     current_app._get_current_object(),
-            #     identity=Identity(user.id))
-
             return redirect(url_for('main.index'))
         else:
             flash("账户或密码错误！")
-    return render_template('login.html')
+    return render_template('login.html', )
 
 
 # 注销
 @auth.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
-    # 注销后身份变成匿名
-    # identity_changed.send(
-    #     current_app._get_current_object(),
-    #     identity=AnonymousIdentity())
     return redirect(url_for('auth.login'))
 
 
 # 更改密码
 @auth.route('/resetpw', methods=['GET', 'POST'])
 @login_required
+@permission
 def resetpw():
     if request.method == 'POST':
         oldpassword = request.form['oldpassword']
@@ -92,6 +85,7 @@ def resetpw():
 # 菜单管理
 @auth.route('/menu', methods=['GET', 'POST'])
 @login_required
+@permission
 def menu():
     return render_template('menu.html')
 
@@ -99,6 +93,7 @@ def menu():
 # 角色页面
 @auth.route('/roles', methods=['GET', 'POST'])
 @login_required
+@permission
 def role():
     return render_template('role.html')
 
@@ -106,66 +101,10 @@ def role():
 # 增加用户
 @auth.route('/adduser', methods=['GET', 'POST'])
 @login_required
+@permission
 def adduser():
-    all_users = User.query.order_by(User.id.desc())
     all_roles = Role.query.all()
-
-    if request.method == 'POST':
-        username = request.form['user']
-        password = request.form['password']
-        select = request.form.getlist('select')
-        roles = []
-        # 转换成为Role对象的list
-        for i in select:
-            role = Role.query.filter_by(name=i).first()
-            roles.append(role)
-
-        user = User.query.filter_by(username=username).first()
-        res = {'status': 200, 'message': "succeed"}
-
-        # 增加用户模块
-        if username and password is not None:
-            # 判断是否存在该用户
-            if user is None:
-                user = User(username=username, password=password)
-                user.roles = roles
-                db.session.add(user)
-                db.session.commit()
-                # 返回json到前端
-                return jsonify(res)
-            else:
-                user.username = username
-                user.password = password
-                user.roles = roles
-                db.session.add(user)
-                db.session.commit()
-                return jsonify(res)
-
-    return render_template('adduser.html', roles=all_roles, test=all_users)
+    return render_template('adduser.html', roles=all_roles)
 
 
-# 查询api接口
-@auth.route('/api/edit_user', methods=['POST'])
-@login_required
-def edit_user():
-    if request.method == 'POST':
-        id = request.form['id']
-        act = request.form['act']
 
-        # 查询
-        if act == "query":
-            user = User.query.get(id)
-            roles = []
-            if user is not None:
-                res = {"username": user.username, }
-                for i in user.roles:
-                    roles.append(i.name)
-                res["roles"] = roles
-            return jsonify(res)
-        # 删除
-        if act == "delect":
-            user = User.query.get(id)
-            db.session.delete(user)
-            db.session.commit()
-            res = {"message": 200}
-            return jsonify(res)

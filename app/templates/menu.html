@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 {% block styles %}
     {{ super() }}
+    <!--图标选择器CSS-->
+    <link rel="stylesheet"
+          href="{{ url_for('static',filename='bootstrap-iconpicker-1.9.0/dist/css/bootstrap-iconpicker.min.css') }}">
     <!-- ztree皮肤 -->
     <link rel="stylesheet" href="{{ url_for('static',filename='zTree_v3/css/metroStyle/metroStyle.css') }}">
     <!-- layui样式 -->
-    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">
+    {#    <link rel="stylesheet" href="{{ url_for('static',filename='layui/css/layui.css') }}" media="all">#}
     <!-- 验证样式 -->
     <link rel="stylesheet" href="{{ url_for('static',filename='bootstrap_validator/bootstrap-validator.css') }}">
 {% endblock %}
-
 {% block title %}菜单管理{% endblock title %}
 {% block content %}
     <div class="content-wrapper">
@@ -87,7 +89,12 @@
                                                 <span>图标样式</span>
                                             </label>
                                             <div class="col-sm-8">
-                                                <input class="form-control" name="ico" disabled="disabled">
+                                                <div class="input-group">
+                                                    <span class="input-group-btn">
+                                                        <button id="icon_target" class="btn btn-default"></button>
+                                                    </span>
+                                                    <input class="form-control" name="ico" disabled="disabled">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -110,9 +117,15 @@
         </section>
     </div>
 {% endblock %}
-
 {% block scripts %}
     {{ super() }}
+    <!-- 图标选择器的JS -->
+    <!-- 图标选择器的JS -->
+    <script type="text/javascript"
+            src="{{ url_for('static',filename='bootstrap-iconpicker-1.9.0/dist/js/bootstrap-iconpicker-iconset-all.js') }}"></script>
+    <script type="text/javascript"
+            src="{{ url_for('static',filename='bootstrap-iconpicker-1.9.0/dist/js/bootstrap-iconpicker.js') }}"></script>
+    <!-- ztree的js -->
     <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.core.js') }}"></script>
     <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.excheck.js') }}"></script>
     <script src="{{ url_for('static',filename='zTree_v3/js/jquery.ztree.exedit.js') }}"></script>
@@ -120,6 +133,25 @@
     <script src="{{ url_for('static',filename='layui/layui.all.js') }}"></script>
     <!-- 验证样式validator的js -->
     <script src="{{ url_for('static',filename="bootstrap_validator/bootstrap-validator.js") }}"></script>
+    <script>
+        $('#icon_target').iconpicker({
+            align: 'center', // Only in div tag
+            cols: 6,
+            search: true,
+            searchText: '搜索图标',
+            footer: true,
+            header: true,
+            iconset: 'fontawesome', labelHeader: '{0} / {1} 页',
+            labelFooter: '{0} - {1} / {2} icons',
+            placement: 'bottom', // Only in button tag
+            rows: 6,
+            selectedClass: 'btn-success',
+            unselectedClass: ''
+        });
+        $('#icon_target').on('change', function (e) {
+            $("input[name='ico']").val(e.icon);
+        });
+    </script>
     <script>
         $(function () {
             $("#update").bootstrapValidator({
@@ -208,15 +240,22 @@
             $("input[name='order']").attr("disabled", false);
             $("input[name='ico']").attr("disabled", false);
             $("#save").attr("disabled", false);
+            $("#icon_target").attr("disabled", false);
         }
 
-        //赋值
+        //表单点击后赋值
         function assignValue(treeNode) {
             $("input[name='id']").val(treeNode.id)
             $("input[name='url']").val(treeNode.url)
             $("input[name='pId']").val(treeNode.pId)
             $("input[name='order']").val(treeNode.order)
             $("input[name='ico']").val(treeNode.ico)
+            if (treeNode.ico.length == 0) {
+                $('#icon_target').iconpicker('setIcon', 'empty')
+                $("input[name='ico']").val('');
+            } else {
+                $('#icon_target').iconpicker('setIcon', treeNode.ico)
+            }
             $("input[name='label']").val(treeNode.name)
         }
 
