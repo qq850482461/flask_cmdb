@@ -26,4 +26,4 @@
 > mysql -uroot -p CMDB < cmdb.sql
 
 4.启动项目
->python manager.py runserver --host 0.0.0.0 --port 9008
+>python manager.py runserver --host 0.0.0.0 --port 5000
