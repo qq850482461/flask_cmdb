@@ -3,6 +3,9 @@
 代码很烂,知道自己有很多不足,以后的学习应该要改进,
 项目需要部署在gunicorn 或者 uwsgi上配合nginx启动.
 
+![预览](https://raw.githubusercontent.com/qq850482461/flask_cmdb/master/images/1.jpg)
+![预览](https://raw.githubusercontent.com/qq850482461/flask_cmdb/master/images/2.jpg)
+![预览](https://raw.githubusercontent.com/qq850482461/flask_cmdb/master/images/3.jpg)
 ### python版本:python3.6 
 ### 数据库: mysql5.6
 ### 默认user:admin pwd:admin
