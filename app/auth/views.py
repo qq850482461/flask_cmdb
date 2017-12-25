@@ -16,7 +16,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user is not None and user.check_password_hash(password):
             if check:
-                login_user(user, remember=True)
+                login_user(user)
             else:
                 login_user(user)
 
