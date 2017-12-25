@@ -5,6 +5,7 @@
 
 ### python版本:python3.6 
 ### 数据库: mysql5.6
+### 默认user:admin pwd:admin
 ## 步骤
 1.安装requirements.txt 项目依赖包,建议使用虚拟环境安装.
 > pip install -r requirements.txt
