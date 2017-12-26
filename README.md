@@ -27,7 +27,7 @@
 > python manager.py create_db
 
 3.导入数据结构
-> mysql -uroot -p CMDB < cmdb.sql
+> mysql -uroot -p cmdb < cmdb.sql
 
 4.启动项目
 >python manager.py runserver --host 0.0.0.0 --port 5000
