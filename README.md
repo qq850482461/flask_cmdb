@@ -23,10 +23,7 @@
 1.创建数据库
 > cteate database CMDB;
 
-2.初始化项目ORM
-> python manager.py create_db
-
-3.导入数据结构
+2.导入数据结构
 > mysql -uroot -p cmdb < cmdb.sql
 
 4.启动项目
