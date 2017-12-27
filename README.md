@@ -26,5 +26,7 @@
 2.导入数据结构
 > mysql -uroot -p cmdb < cmdb.sql
 
-4.启动项目
+3.启动项目
 >python manager.py runserver --host 0.0.0.0 --port 5000
+
+[自己博客记录的部署流程](http://blog.csdn.net/qq850482461/article/details/78893710)
